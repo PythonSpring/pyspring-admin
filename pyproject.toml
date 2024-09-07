@@ -5,7 +5,11 @@ description = "Default template for PDM package"
 authors = [
     {name = "William Chen", email = "ow6201231@gmail.com"},
 ]
-dependencies = []
+dependencies = [
+    "pyjwt>=2.9.0",
+    "passlib>=1.7.4",
+    "bcrypt>=4.2.0",
+]
 requires-python = ">=3.10"
 readme = "README.md"
 license = {text = "MIT"}
