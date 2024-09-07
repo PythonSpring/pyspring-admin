@@ -5,8 +5,8 @@ from fastapi.responses import JSONResponse
 from loguru import logger
 from pydantic import BaseModel
 
-from modules.pyspring_modules.py_spring_admin.repository.user_service import RegisterUser, UserService
-from modules.pyspring_modules.py_spring_admin.service.auth_service import AuthService
+from modules.py_spring_modules.py_spring_admin.repository.user_service import RegisterUser, UserService
+from modules.py_spring_modules.py_spring_admin.service.auth_service import AuthService
 from py_spring.core.entities.controllers.rest_controller import RestController
 
 class CredentialContext(BaseModel):

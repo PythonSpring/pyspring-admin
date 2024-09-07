@@ -1,7 +1,7 @@
 from loguru import logger
-from modules.pyspring_modules.py_spring_admin.repository.models import User, UserRole
-from modules.pyspring_modules.py_spring_admin.repository.user_repository import UserRepository
-from modules.pyspring_modules.py_spring_admin.service.auth_service import AuthService
+from modules.py_spring_modules.py_spring_admin.repository.models import User, UserRole
+from modules.py_spring_modules.py_spring_admin.repository.user_repository import UserRepository
+from modules.py_spring_modules.py_spring_admin.service.auth_service import AuthService
 from py_spring.core.entities.component import Component
 from py_spring.core.entities.properties.properties import Properties
 
