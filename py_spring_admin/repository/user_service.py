@@ -31,6 +31,3 @@ class UserService(Component):
             role=new_user.role
         )
         return self.user_repo.save(user)
-    
-    def post_construct(self) -> None:
-        breakpoint()
