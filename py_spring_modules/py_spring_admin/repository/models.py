@@ -1,15 +1,13 @@
 
-from enum import Enum
 from typing import Optional
 
+from py_spring_modules.py_spring_admin.repository.commons import UserRole
 from pydantic import EmailStr
 from sqlmodel import Field
 from py_spring.persistence.core.py_spring_model import PySpringModel
 
 
-class UserRole(str, Enum):
-    Admin = "admin"
-    Guest = "guest"
+
 
 class User(PySpringModel, table= True):
     __tablename__: str = "user"

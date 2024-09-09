@@ -16,6 +16,7 @@ from py_spring.core.entities.properties.properties import Properties
 JsonWebToken = str
 class JWTUser(TypedDict):
     id: int
+    role: str
 
 class AdminSecurityProperties(Properties):
     __key__ = "admin_security"

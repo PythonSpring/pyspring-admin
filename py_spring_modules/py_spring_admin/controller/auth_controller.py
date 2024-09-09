@@ -1,5 +1,4 @@
-import datetime
-from typing import Callable, ClassVar, Optional
+from typing import ClassVar, Optional
 from fastapi import HTTPException, Request, status
 from fastapi.responses import JSONResponse
 from loguru import logger
@@ -12,7 +11,6 @@ from py_spring.core.entities.controllers.rest_controller import RestController
 class CredentialContext(BaseModel):
     password: str
 
-
 class EmailCredential(CredentialContext):
     email: str
 
@@ -22,21 +20,6 @@ class UserNameCredential(CredentialContext):
 
 
 CredentialType = Optional[ EmailCredential | UserNameCredential]
-
-
-class ExceptionMiddleware:
-    async def __call__(self, request: Request, call_next: Callable):
-        utc_time = datetime.datetime.now(datetime.timezone.utc).strftime(
-            "%Y-%m-%d %H:%M:%S"
-        )
-        try:
-            return await call_next(request)
-        except Exception as base_exception:
-            logger.exception(base_exception)
-            return JSONResponse(
-                content={"detail": str(base_exception), "timestamp": utc_time},
-                status_code=500,
-            )
 
 class AdminAuthController(RestController):
     auth_service: AuthService
@@ -100,8 +83,3 @@ class AdminAuthController(RestController):
         optional_user = self.auth_service.get_jwt_user_from_jwt(optional_jwt)
         logger.info(f"[JWT USER FOUND] User: {optional_user}")
         return optional_user is not None
-        
-    def register_middlewares(self) -> None:
-        self.app.middleware("http")(ExceptionMiddleware())
-
-        
