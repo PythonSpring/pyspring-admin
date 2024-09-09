@@ -1,3 +1,4 @@
+import logging
 from typing import Any, Optional
 from passlib.context import CryptContext
 from uuid import uuid4
@@ -18,7 +19,7 @@ class JWTUser(TypedDict):
 
 class AdminSecurityProperties(Properties):
     __key__ = "admin_security"
-    secret: Optional[str] = Field(default_factory= lambda: str(uuid4()))
+    secret: str = Field(default_factory= lambda: str(uuid4()))
 
 
 
@@ -36,6 +37,9 @@ class AuthService(Component):
     admin_security_properties: AdminSecurityProperties
     uesr_service: UserService
     password_context: CryptContext
+
+    def post_construct(self) -> None:
+        logging.getLogger('passlib').setLevel(logging.ERROR) # Hide passlib logs
 
     def get_hashed_password(self, raw_password: str) -> str:
         return self.password_context.hash(raw_password)

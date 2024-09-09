@@ -1,5 +1,5 @@
 
-from enum import StrEnum
+from enum import Enum
 from typing import Optional
 
 from pydantic import EmailStr
@@ -7,7 +7,7 @@ from sqlmodel import Field
 from py_spring.persistence.core.py_spring_model import PySpringModel
 
 
-class UserRole(StrEnum):
+class UserRole(str, Enum):
     Admin = "admin"
     Guest = "guest"
 
