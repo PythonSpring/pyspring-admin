@@ -3,6 +3,7 @@ from typing import Any, Optional
 from passlib.context import CryptContext
 from uuid import uuid4
 from loguru import logger
+from py_spring_modules.py_spring_admin.repository.commons import UserRead
 from pydantic import Field
 from typing_extensions import TypedDict
 import jwt
@@ -68,7 +69,7 @@ class AuthService(Component):
         optional_user = self.uesr_service.find_user_by_email(email)
         return self.__login_user(optional_user, password)
     
-    def get_jwt_user_from_jwt(self, token: str) -> Optional[JWTUser]:
+    def get_user_from_jwt(self, token: str) -> Optional[UserRead]:
         """
         Validates a JSON Web Token (JWT) by decoding it using the configured secret key and algorithm.
 
@@ -88,7 +89,7 @@ class AuthService(Component):
             logger.error(invalid_token_error)
             return
 
-        return jwt_user
+        return optional_user.as_read()
 
     def __issue_token(self, payload: dict[str, Any]) -> JsonWebToken:
         return jwt.encode(payload, self.admin_security_properties.secret, algorithm="HS256")

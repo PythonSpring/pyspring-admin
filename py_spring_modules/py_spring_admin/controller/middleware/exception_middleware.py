@@ -1,6 +1,6 @@
 import datetime
 from typing import Callable
-from fastapi import Request
+from fastapi import Request, status
 from fastapi.responses import JSONResponse
 from loguru import logger
 from py_spring_modules.py_spring_admin.controller.middleware.middleware_base import MiddlewareBase
@@ -16,6 +16,6 @@ class ExceptionMiddleware(MiddlewareBase):
         except Exception as base_exception:
             logger.error(base_exception)
             return JSONResponse(
-                content={"detail": str(base_exception), "timestamp": utc_time},
-                status_code=500,
+                content= {"message": str(base_exception), "status": status.HTTP_403_FORBIDDEN},
+                status_code=status.HTTP_403_FORBIDDEN,
             )

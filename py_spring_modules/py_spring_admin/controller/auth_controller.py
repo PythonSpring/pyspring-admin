@@ -1,8 +1,9 @@
-from typing import ClassVar, Optional
+from typing import Any, ClassVar, Optional
 from fastapi import HTTPException, Request, status
 from fastapi.responses import JSONResponse
 from loguru import logger
-from pydantic import BaseModel
+from py_spring_modules.py_spring_admin.repository.commons import UserRead
+from pydantic import BaseModel, Field
 
 from modules.py_spring_modules.py_spring_admin.repository.user_service import RegisterUser, UserService
 from modules.py_spring_modules.py_spring_admin.service.auth_service import AuthService
@@ -21,6 +22,12 @@ class UserNameCredential(CredentialContext):
 
 CredentialType = Optional[ EmailCredential | UserNameCredential]
 
+class LoginResponse(BaseModel):
+    message: str
+    user: Optional[UserRead] = Field(default=None)
+    status: int = status.HTTP_200_OK
+
+
 class AdminAuthController(RestController):
     auth_service: AuthService
     user_service: UserService
@@ -30,29 +37,38 @@ class AdminAuthController(RestController):
     class Config:
         prefix: str = "/spring-admin/public"
 
+    def _create_json_response(self, content: str | dict[str, Any], status_code: int = status.HTTP_200_OK) -> JSONResponse:
+        return JSONResponse(content= {"message": content, "status": status_code})
+
     def register_routes(self) -> None:
         @self.router.post("/login")
         def user_login(
             request: Request, credential: CredentialType = None
         ) -> JSONResponse:
-            base_response = JSONResponse("login success")
-
+            base_response = JSONResponse(content= "Login success")
             if self.__validate_jwt_for_existing_users(request):
-                return JSONResponse("already login")
+                return JSONResponse(base_response)
             token = self._handle_token_from_credential(credential)
-            base_response.set_cookie(key=self.COOKIE_NAME, value=token, httponly=True)
+            base_response.set_cookie(key=self.COOKIE_NAME, value=token)
             return base_response
         
         @self.router.get("/logout")
         def user_logout(request: Request) -> JSONResponse:
-            base_response = JSONResponse("logout success")
+            base_response = self._create_json_response("Logout success")
             base_response.delete_cookie(key=self.COOKIE_NAME)
             return base_response
         
         @self.router.post("/register")
         def user_register(new_user: RegisterUser) -> JSONResponse:
             self.user_service.register_user(new_user)
-            return JSONResponse("register success", status_code= status.HTTP_202_ACCEPTED)
+            return self._create_json_response("Register success", status_code= status.HTTP_202_ACCEPTED)
+        
+        @self.router.get("/user")
+        def get_current_user(request: Request) -> LoginResponse:
+            optional_user = self.__get_user_from_cookies(request)
+            if optional_user is None:
+                return LoginResponse(message= "Login required", status= status.HTTP_401_UNAUTHORIZED) 
+            return LoginResponse(user= optional_user, message= "User found", status= status.HTTP_200_OK)
         
     def _handle_token_from_credential(self, credential: CredentialType) -> str:
         if credential is None:
@@ -77,9 +93,15 @@ class AdminAuthController(RestController):
         return token
     
     def __validate_jwt_for_existing_users(self, request: Request) -> bool:
+        return self.__get_user_from_cookies(request) is not None
+    
+    def __get_user_from_cookies(self, request: Request) -> Optional[UserRead]:
         optional_jwt = request.cookies.get(self.COOKIE_NAME)
         if optional_jwt is None:
-            return False
-        optional_user = self.auth_service.get_jwt_user_from_jwt(optional_jwt)
+            return
+        optional_user = self.auth_service.get_user_from_jwt(optional_jwt)
         logger.info(f"[JWT USER FOUND] User: {optional_user}")
-        return optional_user is not None
+        return optional_user
+
+    
+    

@@ -1,7 +1,7 @@
 
 from typing import Optional
 
-from py_spring_modules.py_spring_admin.repository.commons import UserRole
+from py_spring_modules.py_spring_admin.repository.commons import UserRead, UserRole
 from pydantic import EmailStr
 from sqlmodel import Field
 from py_spring.persistence.core.py_spring_model import PySpringModel
@@ -16,3 +16,6 @@ class User(PySpringModel, table= True):
     email: EmailStr = Field(unique=True)
     password: str = Field(exclude=True)
     role: UserRole = Field(default= UserRole.Guest)
+
+    def as_read(self) -> UserRead:
+        return UserRead(role = self.role, user_name= self.user_name)
