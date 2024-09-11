@@ -1,19 +1,25 @@
-
 import datetime
 from typing import Callable, ClassVar
+
 from fastapi import Request, status
 from fastapi.responses import JSONResponse
 from loguru import logger
-from py_spring_modules.py_spring_admin.controller.middleware.middleware_base import MiddlewareBase
+from py_spring_modules.py_spring_admin.controller.middleware.middleware_base import (
+    MiddlewareBase,
+)
 from py_spring_modules.py_spring_admin.service.auth_service import AuthService
 
 
 class AuthMiddleware(MiddlewareBase):
     auth_service: AuthService
     excluded_routes: ClassVar[list[str]] = [
-        "/spring-admin/public"
+        "/spring-admin/public",
+        "/docs",
+        "/favicon.ico",
+        "/openapi.json",
     ]
     COOKIE_NAME: ClassVar[str] = "jwt"
+
     async def __call__(self, request: Request, call_next: Callable):
         utc_time = datetime.datetime.now(datetime.timezone.utc).strftime(
             "%Y-%m-%d %H:%M:%S"

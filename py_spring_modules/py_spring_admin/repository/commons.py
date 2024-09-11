@@ -7,6 +7,7 @@ class UserRole(str, Enum):
     Admin = "admin"
     Guest = "guest"
 
+
 class UserRead(BaseModel):
     role: UserRole
     user_name: str

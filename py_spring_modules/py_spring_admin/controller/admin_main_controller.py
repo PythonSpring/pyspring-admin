@@ -1,12 +1,13 @@
-
-
-from loguru import logger
-from py_spring_modules.py_spring_admin.controller.middleware.auth_middleware import AuthMiddleware
-from py_spring_modules.py_spring_admin.controller.middleware.exception_middleware import ExceptionMiddleware
-from py_spring.core.entities.controllers.rest_controller import RestController
 from fastapi.middleware.cors import CORSMiddleware
+from loguru import logger
+from py_spring_modules.py_spring_admin.controller.middleware.auth_middleware import (
+    AuthMiddleware,
+)
+from py_spring_modules.py_spring_admin.controller.middleware.exception_middleware import (
+    ExceptionMiddleware,
+)
 
-
+from py_spring.core.entities.controllers.rest_controller import RestController
 
 
 class AdminMainController(RestController):
@@ -17,7 +18,7 @@ class AdminMainController(RestController):
         logger.success("[ENABLE CORS] Enable CORS for FastAPI App")
         self.app.add_middleware(
             CORSMiddleware,
-            allow_origins= ["*"],
+            allow_origins=["*"],
             allow_credentials=True,
             allow_methods=["*"],
             allow_headers=["*"],
