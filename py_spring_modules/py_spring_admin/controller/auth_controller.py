@@ -3,7 +3,7 @@ from typing import Any, ClassVar, Optional
 from fastapi import HTTPException, Request, status
 from fastapi.responses import JSONResponse
 from loguru import logger
-from py_spring_modules.py_spring_admin.repository.commons import UserRead
+from modules.py_spring_modules.py_spring_admin.repository.commons import UserRead
 from pydantic import BaseModel, Field
 
 from modules.py_spring_modules.py_spring_admin.repository.user_service import (

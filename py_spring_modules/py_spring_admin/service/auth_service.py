@@ -5,7 +5,7 @@ from uuid import uuid4
 import jwt
 from loguru import logger
 from passlib.context import CryptContext
-from py_spring_modules.py_spring_admin.repository.commons import UserRead
+from modules.py_spring_modules.py_spring_admin.repository.commons import UserRead
 from pydantic import Field
 from typing_extensions import TypedDict
 
@@ -45,6 +45,33 @@ class SecurityBeanCollection(BeanCollection):
 
 
 class AuthService(Component):
+    """
+    AuthService is responsible for handling authentication-related operations such as hashing passwords,
+    verifying user credentials, issuing JSON Web Tokens (JWT), and validating JWTs.
+    Attributes:
+        admin_security_properties (AdminSecurityProperties): Configuration properties for admin security.
+        uesr_service (UserService): Service for user-related operations.
+        password_context (CryptContext): Context for password hashing and verification.
+    Methods:
+        post_construct() -> None:
+            Initializes the service by setting the logging level for passlib.
+        get_hashed_password(raw_password: str) -> str:
+            Returns the hashed version of the provided raw password.
+        __is_correct_password(raw_password: str, hashed_password: str) -> bool:
+            Checks if the provided raw password matches the hashed password.
+        __login_user(optional_user: Optional[User], password: str) -> JsonWebToken:
+            Authenticates the user and issues a JWT if credentials are correct.
+        user_login_by_user_name(user_name: str, password: str) -> JsonWebToken:
+            Authenticates a user by their username and password, then issues a JWT.
+        user_login_by_email(email: str, password: str) -> JsonWebToken:
+            Authenticates a user by their email and password, then issues a JWT.
+        get_user_from_jwt(token: str) -> Optional[UserRead]:
+            Validates a JWT and returns the corresponding user information if valid.
+        __issue_token(payload: dict[str, Any]) -> JsonWebToken:
+            Issues a JWT with the provided payload.
+    """
+
+
     admin_security_properties: AdminSecurityProperties
     uesr_service: UserService
     password_context: CryptContext

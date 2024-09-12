@@ -1,13 +1,14 @@
 import datetime
+from http import HTTPMethod
 from typing import Callable, ClassVar
 
 from fastapi import Request, status
 from fastapi.responses import JSONResponse
 from loguru import logger
-from py_spring_modules.py_spring_admin.controller.middleware.middleware_base import (
+from modules.py_spring_modules.py_spring_admin.controller.middleware.middleware_base import (
     MiddlewareBase,
 )
-from py_spring_modules.py_spring_admin.service.auth_service import AuthService
+from modules.py_spring_modules.py_spring_admin.service.auth_service import AuthService
 
 
 class AuthMiddleware(MiddlewareBase):
@@ -24,6 +25,8 @@ class AuthMiddleware(MiddlewareBase):
         utc_time = datetime.datetime.now(datetime.timezone.utc).strftime(
             "%Y-%m-%d %H:%M:%S"
         )
+        if request.method == HTTPMethod.OPTIONS:
+            return await call_next(request)
         optional_jwt = request.cookies.get(self.COOKIE_NAME)
         for url in self.excluded_routes:
             if url in str(request.url):

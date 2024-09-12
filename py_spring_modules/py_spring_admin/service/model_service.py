@@ -5,7 +5,7 @@ from typing_extensions import ReadOnly
 from uuid import UUID
 
 import cachetools
-from pydantic import BaseModel, computed_field, Field
+from pydantic import BaseModel, computed_field, Field, field_validator
 from sqlmodel import select
 
 from py_spring.core.entities.component import Component
@@ -17,6 +17,19 @@ ID = TypeVar("ID", int, UUID)
 def to_camel_case(snake_str: str) -> str:
     components = snake_str.split("_")
     return components[0] + "".join(word.title() for word in components[1:])
+
+def to_snake_case(camel_str: str) -> str:
+    return "".join(
+        [f"_{char.lower()}"  if char.isupper() else char for char in camel_str]
+    ).lstrip("_")
+
+class InputField(BaseModel):
+    key: str
+    value: Any
+
+    @field_validator("key", mode="before")
+    def validate_key(cls, value: str) -> str:
+        return to_snake_case(value)
 
 class _TableColumn(BaseModel):
     private_field: str = Field(exclude= True)
@@ -41,7 +54,7 @@ class _TableColumn(BaseModel):
     @computed_field
     @property
     def header(self) -> str:
-        return self.field.replace("_", " ").title()
+        return self.field.replace("_", " ").upper()
 
 
 class TableView(BaseModel):
@@ -63,7 +76,15 @@ class ModelService(Component):
     def post_construct(self) -> None:
         self.models = PySpringModel.get_model_lookup()
         self.table_definitions = PySpringModel.metadata.tables
-        self.find_columns_by_table("user")
+    
+
+    @cachetools.cached(cache={})
+    def get_primary_key_columns(self, table_name: str) -> list[str]:
+        column_names: list[str] = []
+        for column in self.table_definitions[table_name].columns:
+            if column.primary_key:
+                column_names.append(column.name)
+        return column_names
 
     @cachetools.cached(cache={})
     def get_table_column_enum_choices(self, table_name: str, column: str) -> list[str]:
@@ -115,13 +136,24 @@ class ModelService(Component):
             rows = [json.loads(_model.model_dump_json()) for _model in result]
         table_columns = self.find_columns_by_table(table_name)
         return TableView(table_name= table_name, columns= table_columns, rows=rows)
+    
+    def add_model_into_table_by_input_fields(self, table_name: str, input_fields: list[InputField]) -> TransactionResponse:
+        model_cls = self.models[table_name]
+        primary_key_columns = self.get_primary_key_columns(table_name)
+        model_dict = {}
+        for field in input_fields:
+            if field.key in primary_key_columns:
+                continue
+            
+            model_dict[field.key] = field.value
+        return self._add_model_into_table(table_name, model_dict)
 
-    def add_model_into_table(
+    def _add_model_into_table(
         self, table_name: str, model_json_dict: dict[str, Any]
     ) -> TransactionResponse:
         model_cls = self.models[table_name]
-        model_instance = model_cls.model_validate(model_json_dict)
         try:
+            model_instance = model_cls.model_validate(model_json_dict)
             with PySpringModel.create_managed_session() as session:
                 session.add(model_instance)
         except Exception as error:

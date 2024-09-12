@@ -1,9 +1,9 @@
 from fastapi.middleware.cors import CORSMiddleware
 from loguru import logger
-from py_spring_modules.py_spring_admin.controller.middleware.auth_middleware import (
+from modules.py_spring_modules.py_spring_admin.controller.middleware.auth_middleware import (
     AuthMiddleware,
 )
-from py_spring_modules.py_spring_admin.controller.middleware.exception_middleware import (
+from modules.py_spring_modules.py_spring_admin.controller.middleware.exception_middleware import (
     ExceptionMiddleware,
 )
 
