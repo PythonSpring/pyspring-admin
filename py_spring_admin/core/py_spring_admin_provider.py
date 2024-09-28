@@ -15,6 +15,14 @@ from py_spring_admin.core.service.auth_service import AdminSecurityProperties, A
 from py_spring_admin.core.service.model_service import ModelService
 
 def provide_py_spring_admin() -> EntityProvider:
+    """
+    Provides an EntityProvider instance that configures and returns a PySpringAdmin application.
+    
+    The EntityProvider instance is responsible for registering all the necessary components, properties, models, bean collections, and REST controllers required for the PySpringAdmin application.
+    
+    Returns:
+        EntityProvider: The configured EntityProvider instance for the PySpringAdmin application.
+    """
     provider = EntityProvider(
         component_classes=[
             PySpringAdmin,
