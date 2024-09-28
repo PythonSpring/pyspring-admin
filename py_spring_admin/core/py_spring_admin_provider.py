@@ -1,16 +1,15 @@
 from py_spring import EntityProvider
 
+from py_spring_admin.core.controller.admin_main_controller import AdminMainController
 from py_spring_admin.core.controller.admin_site_static_file_controller import (
     AdminSiteStaticFileController,
 )
 from py_spring_admin.core.controller.auth_controller import AdminAuthController
-from py_spring_admin.core.controller.admin_main_controller import AdminMainController
 from py_spring_admin.core.controller.middleware.auth_middleware import AuthMiddleware
 from py_spring_admin.core.controller.middleware.exception_middleware import (
     ExceptionMiddleware,
 )
 from py_spring_admin.core.controller.model_controller import ModelController
-from py_spring_admin.core.controller.admin_main_controller import AdminMainController
 from py_spring_admin.core.py_spring_admin import AdminUserProperties, PySpringAdmin
 from py_spring_admin.core.repository.models import User
 from py_spring_admin.core.repository.user_repository import UserRepository

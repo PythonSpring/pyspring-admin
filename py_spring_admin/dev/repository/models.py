@@ -2,19 +2,11 @@ import datetime
 from decimal import Decimal
 from enum import Enum
 from typing import Annotated, Optional
-from typing_extensions import ReadOnly
+
 from py_spring import PySpringModel
-from sqlmodel import Field
-
 from pydantic import EmailStr
 from sqlmodel import Field, Relationship
-
-import datetime
-from decimal import Decimal
-from enum import Enum
-from typing import Optional, Annotated
-from pydantic import EmailStr
-from sqlmodel import Field, Relationship
+from typing_extensions import ReadOnly
 
 
 class AccountType(str, Enum):
