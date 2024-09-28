@@ -3,11 +3,9 @@ from typing import Any, Callable
 
 from fastapi import Request
 from loguru import logger
+
 from py_spring_admin.core.repository.commons import UserRole
-from py_spring_admin.core.service.auth_service import (
-    InvalidAdminUserError,
-    JWTUser,
-)
+from py_spring_admin.core.service.auth_service import InvalidAdminUserError, JWTUser
 
 
 def get_current_user(request: Request) -> JWTUser:

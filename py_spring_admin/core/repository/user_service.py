@@ -1,12 +1,10 @@
 from typing import Optional
 
+from py_spring.core.entities.component import Component
 from pydantic import BaseModel
 
 from py_spring_admin.core.repository.models import User, UserRole
-from py_spring_admin.core.repository.user_repository import (
-    UserRepository,
-)
-from py_spring.core.entities.component import Component
+from py_spring_admin.core.repository.user_repository import UserRepository
 
 
 class RegisterUser(BaseModel):

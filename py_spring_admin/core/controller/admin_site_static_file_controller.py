@@ -1,4 +1,5 @@
 from typing import ClassVar
+
 from fastapi.staticfiles import StaticFiles
 from py_spring import RestController
 

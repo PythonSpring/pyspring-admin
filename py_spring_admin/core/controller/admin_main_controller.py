@@ -1,13 +1,11 @@
 from fastapi.middleware.cors import CORSMiddleware
 from loguru import logger
-from py_spring_admin.core.controller.middleware.auth_middleware import (
-    AuthMiddleware,
-)
+from py_spring.core.entities.controllers.rest_controller import RestController
+
+from py_spring_admin.core.controller.middleware.auth_middleware import AuthMiddleware
 from py_spring_admin.core.controller.middleware.exception_middleware import (
     ExceptionMiddleware,
 )
-
-from py_spring.core.entities.controllers.rest_controller import RestController
 
 
 class AdminMainController(RestController):

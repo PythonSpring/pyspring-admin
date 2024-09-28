@@ -1,8 +1,8 @@
 from typing import Optional
 
+from py_spring.persistence.repositories.crud_repository import CrudRepository
 
 from py_spring_admin.core.repository.models import User
-from py_spring.persistence.repositories.crud_repository import CrudRepository
 
 
 class UserRepository(CrudRepository[int, User]):

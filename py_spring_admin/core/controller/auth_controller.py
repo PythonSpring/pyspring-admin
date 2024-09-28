@@ -3,15 +3,12 @@ from typing import Any, ClassVar, Optional
 from fastapi import HTTPException, Request, status
 from fastapi.responses import JSONResponse
 from loguru import logger
-from py_spring_admin.core.repository.commons import UserRead
+from py_spring.core.entities.controllers.rest_controller import RestController
 from pydantic import BaseModel, Field
 
-from py_spring_admin.core.repository.user_service import (
-    RegisterUser,
-    UserService,
-)
+from py_spring_admin.core.repository.commons import UserRead
+from py_spring_admin.core.repository.user_service import RegisterUser, UserService
 from py_spring_admin.core.service.auth_service import AuthService
-from py_spring.core.entities.controllers.rest_controller import RestController
 
 
 class CredentialContext(BaseModel):
