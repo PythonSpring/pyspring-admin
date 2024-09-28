@@ -16,6 +16,6 @@ class AdminSiteStaticFileController(RestController):
     http://0.0.0.0:8080/spring-admin/public/site
     """
     
-    DIST_DIR: ClassVar[str] = "py_spring_admin/core/controller/static/dist"
+    DIST_DIR: ClassVar[str] = "py_spring_admin/core/controller/static/_dist"
     def register_routes(self) -> None:
         self.app.mount("/spring-admin/public/site", StaticFiles(directory=self.DIST_DIR, html=True), name="spring_admin")
