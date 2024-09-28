@@ -9,6 +9,8 @@ from py_spring_admin.core.repository.models import User
 from py_spring_admin.core.repository.user_repository import UserRepository
 from py_spring_admin.core.repository.user_service import UserService
 from py_spring_admin.core.service.auth_service import AdminSecurityProperties, AuthService, SecurityBeanCollection
+from py_spring_admin.core.controller.model_controller import ModelController
+
 
 def provide_py_spring_admin() -> EntityProvider:
     provider = EntityProvider(
@@ -32,7 +34,8 @@ def provide_py_spring_admin() -> EntityProvider:
         ],
         rest_controller_classes= [
             AdminMainController,
-            AdminAuthController
+            AdminAuthController,
+            ModelController
         ]
         
     )
