@@ -5,10 +5,10 @@ from typing import Callable, ClassVar
 from fastapi import Request, status
 from fastapi.responses import JSONResponse
 from loguru import logger
-from py_spring_modules.py_spring_admin.controller.middleware.middleware_base import (
+from py_spring_admin.core.controller.middleware.middleware_base import (
     MiddlewareBase,
 )
-from py_spring_modules.py_spring_admin.service.auth_service import AuthService
+from py_spring_admin.core.service.auth_service import AuthService
 
 
 class AuthMiddleware(MiddlewareBase):

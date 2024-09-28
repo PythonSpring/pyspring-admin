@@ -1,7 +1,7 @@
 from typing import Optional
 
 
-from py_spring_modules.py_spring_admin.repository.models import User
+from py_spring_admin.core.repository.models import User
 from py_spring.persistence.repositories.crud_repository import CrudRepository
 
 

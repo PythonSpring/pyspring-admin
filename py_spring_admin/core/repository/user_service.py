@@ -2,8 +2,8 @@ from typing import Optional
 
 from pydantic import BaseModel
 
-from py_spring_modules.py_spring_admin.repository.models import User, UserRole
-from py_spring_modules.py_spring_admin.repository.user_repository import (
+from py_spring_admin.core.repository.models import User, UserRole
+from py_spring_admin.core.repository.user_repository import (
     UserRepository,
 )
 from py_spring.core.entities.component import Component

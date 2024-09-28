@@ -3,7 +3,7 @@ from decimal import Decimal
 from typing import Annotated, Optional
 from typing_extensions import ReadOnly
 
-from py_spring_modules.py_spring_admin.repository.commons import UserRead, UserRole
+from py_spring_admin.core.repository.commons import UserRead, UserRole
 from pydantic import EmailStr
 from sqlmodel import Field
 

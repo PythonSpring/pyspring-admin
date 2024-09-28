@@ -1,13 +1,13 @@
 from typing import Annotated, Any
 
 from fastapi import Depends
-from py_spring_modules.py_spring_admin.controller.depends_utils import (
+from py_spring_admin.core.controller.depends_utils import (
     admin_required,
     get_current_user,
 )
-from py_spring_modules.py_spring_admin.repository.user_service import UserService
-from py_spring_modules.py_spring_admin.service.auth_service import JWTUser
-from py_spring_modules.py_spring_admin.service.model_service import (
+from py_spring_admin.core.repository.user_service import UserService
+from py_spring_admin.core.service.auth_service import JWTUser
+from py_spring_admin.core.service.model_service import (
     InputField,
     ModelService,
     TableView,

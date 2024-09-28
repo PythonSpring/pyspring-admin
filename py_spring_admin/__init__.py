@@ -1,0 +1,2 @@
+from py_spring_admin.dev.test_tables_provider import provide_test_tables
+from py_spring_admin.core.py_spring_admin_provider import provide_py_spring_admin
