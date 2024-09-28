@@ -1,7 +1,10 @@
 from typing import ClassVar
 
 from fastapi.staticfiles import StaticFiles
+from loguru import logger
 from py_spring import RestController
+
+from py_spring_admin.core.controller import build_utils
 
 
 class AdminSiteStaticFileController(RestController):
@@ -40,8 +43,10 @@ class AdminSiteStaticFileController(RestController):
     DIST_DIR: ClassVar[str] = "py_spring_admin/core/controller/static/_dist"
 
     def register_routes(self) -> None:
+        static_file_dir = build_utils.resource_path(self.DIST_DIR)
+        logger.success(f"[STATIC FILES] Static files served from {static_file_dir}")
         self.app.mount(
             "/spring-admin/public/site",
-            StaticFiles(directory=self.DIST_DIR, html=True),
+            StaticFiles(directory=static_file_dir, html=True),
             name="spring_admin",
         )
