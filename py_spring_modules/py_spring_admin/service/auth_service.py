@@ -5,12 +5,12 @@ from uuid import uuid4
 import jwt
 from loguru import logger
 from passlib.context import CryptContext
-from modules.py_spring_modules.py_spring_admin.repository.commons import UserRead
+from py_spring_modules.py_spring_admin.repository.commons import UserRead
 from pydantic import Field
 from typing_extensions import TypedDict
 
-from modules.py_spring_modules.py_spring_admin.repository.models import User
-from modules.py_spring_modules.py_spring_admin.repository.user_service import (
+from py_spring_modules.py_spring_admin.repository.models import User
+from py_spring_modules.py_spring_admin.repository.user_service import (
     UserService,
 )
 from py_spring.core.entities.bean_collection import BeanCollection

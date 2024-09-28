@@ -3,8 +3,8 @@ from typing import Any, Callable
 
 from fastapi import Request
 from loguru import logger
-from modules.py_spring_modules.py_spring_admin.repository.commons import UserRole
-from modules.py_spring_modules.py_spring_admin.service.auth_service import (
+from py_spring_modules.py_spring_admin.repository.commons import UserRole
+from py_spring_modules.py_spring_admin.service.auth_service import (
     InvalidAdminUserError,
     JWTUser,
 )

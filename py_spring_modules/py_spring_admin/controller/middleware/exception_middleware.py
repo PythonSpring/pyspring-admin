@@ -4,7 +4,7 @@ from typing import Callable
 from fastapi import Request, status
 from fastapi.responses import JSONResponse
 from loguru import logger
-from modules.py_spring_modules.py_spring_admin.controller.middleware.middleware_base import (
+from py_spring_modules.py_spring_admin.controller.middleware.middleware_base import (
     MiddlewareBase,
 )
 

@@ -3,14 +3,14 @@ from typing import Any, ClassVar, Optional
 from fastapi import HTTPException, Request, status
 from fastapi.responses import JSONResponse
 from loguru import logger
-from modules.py_spring_modules.py_spring_admin.repository.commons import UserRead
+from py_spring_modules.py_spring_admin.repository.commons import UserRead
 from pydantic import BaseModel, Field
 
-from modules.py_spring_modules.py_spring_admin.repository.user_service import (
+from py_spring_modules.py_spring_admin.repository.user_service import (
     RegisterUser,
     UserService,
 )
-from modules.py_spring_modules.py_spring_admin.service.auth_service import AuthService
+from py_spring_modules.py_spring_admin.service.auth_service import AuthService
 from py_spring.core.entities.controllers.rest_controller import RestController
 
 
