@@ -34,7 +34,7 @@ def admin_required(func: Callable[..., Any]) -> Callable[..., Any]:
         def some_admin_function(user: Annotated[JWTUser, Depends(get_current_user)], ...):
             ...
     """
-    
+
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
         user = kwargs.get("user", None)

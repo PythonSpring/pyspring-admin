@@ -20,5 +20,3 @@ class User(PySpringModel, table=True):
 
     def as_read(self) -> UserRead:
         return UserRead(role=self.role, user_name=self.user_name)
-
-

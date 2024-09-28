@@ -18,10 +18,12 @@ def to_camel_case(snake_str: str) -> str:
     components = snake_str.split("_")
     return components[0] + "".join(word.title() for word in components[1:])
 
+
 def to_snake_case(camel_str: str) -> str:
     return "".join(
-        [f"_{char.lower()}"  if char.isupper() else char for char in camel_str]
+        [f"_{char.lower()}" if char.isupper() else char for char in camel_str]
     ).lstrip("_")
+
 
 class InputField(BaseModel):
     key: str
@@ -31,8 +33,9 @@ class InputField(BaseModel):
     def validate_key(cls, value: str) -> str:
         return to_snake_case(value)
 
+
 class _TableColumn(BaseModel):
-    private_field: str = Field(exclude= True)
+    private_field: str = Field(exclude=True)
     sql_type: str
     builtin_type: str
     is_primary_key: bool
@@ -43,13 +46,10 @@ class _TableColumn(BaseModel):
     def is_enum(self) -> bool:
         return self.builtin_type == Enum.__name__
 
-
-
     @computed_field
     @property
     def field(self) -> str:
         return to_camel_case(self.private_field)
-    
 
     @computed_field
     @property
@@ -76,7 +76,6 @@ class ModelService(Component):
     def post_construct(self) -> None:
         self.models = PySpringModel.get_model_lookup()
         self.table_definitions = PySpringModel.metadata.tables
-    
 
     @cachetools.cached(cache={})
     def get_primary_key_columns(self, table_name: str) -> list[str]:
@@ -91,8 +90,6 @@ class ModelService(Component):
         model_cls = self.models[table_name]
         column_type: Type[Enum] = model_cls.__annotations__[column]
         return [enum_type.value for enum_type in column_type]
-            
-
 
     def find_all_tables(self) -> list[str]:
         return [table_name for table_name in self.table_definitions]
@@ -104,25 +101,24 @@ class ModelService(Component):
             is_readonly: bool = False
             builtin_type: Type[object] = model_cls.__annotations__[column.name]
             is_enum = builtin_type.__class__ == Enum.__class__
-            origin_type =  get_origin(builtin_type)
+            origin_type = get_origin(builtin_type)
             is_optional = origin_type is Union
             is_annotatted = origin_type is Annotated
             if is_annotatted:
                 real_type, metadata = get_args(builtin_type)
                 is_readonly = metadata is ReadOnly
                 builtin_type = real_type
-            
+
             if is_enum:
                 builtin_type = Enum
             if is_optional:
                 builtin_type = get_args(builtin_type)[0]
             table_column = _TableColumn(
-                private_field=column.name, 
-                sql_type=str(column.type), 
-                builtin_type= builtin_type.__name__,
+                private_field=column.name,
+                sql_type=str(column.type),
+                builtin_type=builtin_type.__name__,
                 is_primary_key=column.primary_key,
-                is_readonly=is_readonly or column.primary_key
-
+                is_readonly=is_readonly or column.primary_key,
             )
             columns.append(table_column)
 
@@ -135,16 +131,18 @@ class ModelService(Component):
             result = session.exec(statement).fetchall()
             rows = [json.loads(_model.model_dump_json()) for _model in result]
         table_columns = self.find_columns_by_table(table_name)
-        return TableView(table_name= table_name, columns= table_columns, rows=rows)
-    
-    def add_model_into_table_by_input_fields(self, table_name: str, input_fields: list[InputField]) -> TransactionResponse:
+        return TableView(table_name=table_name, columns=table_columns, rows=rows)
+
+    def add_model_into_table_by_input_fields(
+        self, table_name: str, input_fields: list[InputField]
+    ) -> TransactionResponse:
         model_cls = self.models[table_name]
         primary_key_columns = self.get_primary_key_columns(table_name)
         model_dict = {}
         for field in input_fields:
             if field.key in primary_key_columns:
                 continue
-            
+
             model_dict[field.key] = field.value
         return self._add_model_into_table(table_name, model_dict)
 

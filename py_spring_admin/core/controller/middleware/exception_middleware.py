@@ -13,6 +13,7 @@ class ExceptionMiddleware(MiddlewareBase):
     """
     Middleware for handling exceptions in the application.
     """
+
     async def __call__(self, request: Request, call_next: Callable):
         utc_time = datetime.datetime.now(datetime.timezone.utc).strftime(
             "%Y-%m-%d %H:%M:%S"

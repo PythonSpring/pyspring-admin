@@ -71,7 +71,6 @@ class AuthService(Component):
             Issues a JWT with the provided payload.
     """
 
-
     admin_security_properties: AdminSecurityProperties
     uesr_service: UserService
     password_context: CryptContext

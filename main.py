@@ -1,14 +1,13 @@
-
 from py_spring import PySpringApplication
 from py_spring_admin import provide_py_spring_admin, provide_test_tables
 
 
 def main():
-    app = PySpringApplication("./app-config.json", entity_providers= [
-        provide_py_spring_admin(), provide_test_tables()
-    ])
+    app = PySpringApplication(
+        "./app-config.json",
+        entity_providers=[provide_py_spring_admin(), provide_test_tables()],
+    )
     app.run()
-
 
 
 if __name__ == "__main__":
