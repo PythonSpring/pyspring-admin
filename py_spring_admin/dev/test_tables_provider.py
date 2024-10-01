@@ -4,5 +4,5 @@ from py_spring_admin.dev.repository.models import BankAccount, BankBranch, Trans
 
 
 def provide_test_tables() -> EntityProvider:
-    provider = EntityProvider(model_classes=[BankAccount, BankBranch, Transaction])
+    provider = EntityProvider(extneral_dependencies=[BankAccount, BankBranch, Transaction])
     return provider

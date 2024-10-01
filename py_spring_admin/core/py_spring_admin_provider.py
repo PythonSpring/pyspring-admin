@@ -42,7 +42,6 @@ def provide_py_spring_admin() -> EntityProvider:
             ModelService,
         ],
         properties_classes=[AdminUserProperties, AdminSecurityProperties],
-        model_classes=[User],
         bean_collection_classes=[SecurityBeanCollection],
         rest_controller_classes=[
             AdminMainController,
@@ -50,5 +49,6 @@ def provide_py_spring_admin() -> EntityProvider:
             ModelController,
             AdminSiteStaticFileController,
         ],
+        extneral_dependencies=[User]
     )
     return provider
