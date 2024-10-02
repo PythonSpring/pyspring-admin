@@ -26,7 +26,7 @@ class UserService(Component):
     def find_user_by_id(self, user_id: int) -> Optional[User]:
         return self.user_repo.find_by_id(user_id)
 
-    def register_user(self, new_user: RegisterUser):
+    def register_user(self, new_user: RegisterUser) -> User:
         user = User(
             user_name=new_user.user_name,
             password=new_user.password,
