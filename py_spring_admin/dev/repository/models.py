@@ -3,7 +3,7 @@ from decimal import Decimal
 from enum import Enum
 from typing import Annotated, Optional
 
-from py_spring import PySpringModel
+from py_spring_model import PySpringModel
 from pydantic import EmailStr
 from sqlmodel import Field, Relationship
 from typing_extensions import ReadOnly
