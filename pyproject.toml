@@ -9,9 +9,9 @@ dependencies = [
     "pyjwt>=2.9.0",
     "passlib>=1.7.4",
     "bcrypt>=4.2.0",
-    "py-spring @ git+https://github.com/PythonSpring/pyspring-core.git@main",
-    "py-spring-model @ git+https://github.com/PythonSpring/pyspring-model.git@main",
-    "psycopg2-binary>=2.9.9"
+    "py-spring-core==0.0.4",
+    "py-spring-model @ git+https://github.com/PythonSpring/pyspring-model.git@2e3725928a72d23aeaef8f42024859eefa3192d8",
+    "psycopg2-binary>=2.9.9",
 ]
 requires-python = ">=3.10"
 readme = "README.md"
