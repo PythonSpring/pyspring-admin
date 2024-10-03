@@ -1,6 +1,6 @@
 from typing import Optional
 
-from py_spring_core.core.entities.component import Component
+from py_spring_core import Component
 from pydantic import BaseModel
 
 from py_spring_admin.core.repository.models import User, UserRole

@@ -1,7 +1,7 @@
 from typing import Annotated, Any
 
 from fastapi import Depends
-from py_spring_core.core.entities.controllers.rest_controller import RestController
+from py_spring_core import RestController
 
 from py_spring_admin.core.controller.depends_utils import (
     admin_required,

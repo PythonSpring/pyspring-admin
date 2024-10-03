@@ -4,7 +4,7 @@ from typing import Annotated, Any, Type, TypeVar, Union, get_args, get_origin
 from uuid import UUID
 
 import cachetools
-from py_spring_core.core.entities.component import Component
+from py_spring_core import Component
 from py_spring_model import PySpringModel
 from pydantic import BaseModel, Field, computed_field, field_validator
 from sqlmodel import select

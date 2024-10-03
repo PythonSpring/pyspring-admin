@@ -5,9 +5,7 @@ from uuid import uuid4
 import jwt
 from loguru import logger
 from passlib.context import CryptContext
-from py_spring_core.core.entities.bean_collection import BeanCollection
-from py_spring_core.core.entities.component import Component
-from py_spring_core.core.entities.properties.properties import Properties
+from py_spring_core import Component, Properties, BeanCollection
 from pydantic import Field
 from typing_extensions import TypedDict
 
