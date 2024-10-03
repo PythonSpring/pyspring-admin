@@ -1,11 +1,11 @@
 import datetime
-from http import HTTPMethod
 from typing import Callable, ClassVar
 
 from fastapi import Request, status
 from fastapi.responses import JSONResponse
 from loguru import logger
 
+from py_spring_admin.core.controller.commons import HTTPMethod
 from py_spring_admin.core.controller.middleware.middleware_base import MiddlewareBase
 from py_spring_admin.core.service.auth_service import AuthService
 
