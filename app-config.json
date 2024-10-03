@@ -1,0 +1,14 @@
+{
+  "app_src_target_dir": "./src",
+  "server_config": {
+    "host": "0.0.0.0",
+    "port": 8080,
+    "enabled": true
+  },
+  
+  "properties_file_path": "./application-properties.json",
+  "loguru_config": {
+    "log_file_path": "./logs/app.log",
+    "log_level": "DEBUG"
+  }
+}

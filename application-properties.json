@@ -1,0 +1,14 @@
+{
+    "admin_user": {
+        "user_name": "admin",
+        "password": "admin",
+        "email": "admin@admin.com"
+    },
+    "admin_security": {
+        
+    },
+    "py_spring_model": {
+        "sqlalchemy_database_uri": "postgresql://admin:admin@postgres:5432/db",
+        "model_file_postfix_patterns": ["models.py"]
+    }
+}
