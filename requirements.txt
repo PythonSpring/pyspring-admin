@@ -29,8 +29,8 @@ mdurl==0.1.2
 orjson==3.10.7
 passlib==1.7.4
 psycopg2-binary==2.9.9
-py-spring @ git+https://github.com/PythonSpring/pyspring-core.git@main
-py-spring-model @ git+https://github.com/PythonSpring/pyspring-model.git@main
+py-spring-core==0.0.4
+py-spring-model @ git+https://github.com/PythonSpring/pyspring-model.git@2e3725928a72d23aeaef8f42024859eefa3192d8
 pydantic==2.8.2
 pydantic-core==2.20.1
 pydantic-extra-types==2.9.0
