@@ -1,4 +1,4 @@
-from py_spring import EntityProvider
+from py_spring_core import EntityProvider
 
 from py_spring_admin.core.controller.admin_main_controller import AdminMainController
 from py_spring_admin.core.controller.admin_site_static_file_controller import (
@@ -49,6 +49,6 @@ def provide_py_spring_admin() -> EntityProvider:
             ModelController,
             AdminSiteStaticFileController,
         ],
-        extneral_dependencies=[User]
+        extneral_dependencies=[User],
     )
     return provider

@@ -3,7 +3,7 @@ from typing import Any, ClassVar, Optional
 from fastapi import HTTPException, Request, status
 from fastapi.responses import JSONResponse
 from loguru import logger
-from py_spring.core.entities.controllers.rest_controller import RestController
+from py_spring_core.core.entities.controllers.rest_controller import RestController
 from pydantic import BaseModel, Field
 
 from py_spring_admin.core.repository.commons import UserRead

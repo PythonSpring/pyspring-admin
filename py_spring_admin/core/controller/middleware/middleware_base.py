@@ -1,4 +1,4 @@
-from py_spring.core.entities.component import Component
+from py_spring_core.core.entities.component import Component
 
 
 class MiddlewareBase(Component): ...

@@ -1,11 +1,11 @@
 from typing import Annotated, Optional
+
+from py_spring_model import PySpringModel
+from pydantic import EmailStr
+from sqlmodel import Field
 from typing_extensions import ReadOnly
 
 from py_spring_admin.core.repository.commons import UserRead, UserRole
-from pydantic import EmailStr
-from sqlmodel import Field
-
-from py_spring_model import PySpringModel
 
 
 class User(PySpringModel, table=True):
