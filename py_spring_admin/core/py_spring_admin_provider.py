@@ -46,8 +46,7 @@ def provide_py_spring_admin() -> EntityProvider:
         rest_controller_classes=[
             AdminMainController,
             AdminAuthController,
-            ModelController,
-            AdminSiteStaticFileController,
+            ModelController
         ],
         extneral_dependencies=[User],
     )

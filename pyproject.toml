@@ -1,5 +1,5 @@
 [project]
-name = "PySpring-Admin"
+name = "py_spring_admin"
 version = "1.0.0"
 description = "Default template for PDM package"
 authors = [
