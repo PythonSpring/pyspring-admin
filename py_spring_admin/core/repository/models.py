@@ -17,4 +17,4 @@ class User(PySpringModel, table=True):
     role: UserRole = Field(default=UserRole.Guest)
 
     def as_read(self) -> UserRead:
-        return UserRead(role=self.role, user_name=self.user_name)
+        return UserRead(id= self.id, role=self.role, user_name=self.user_name)
