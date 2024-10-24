@@ -9,7 +9,7 @@ from py_spring_admin.core.repository.commons import UserRead, UserRole
 
 
 class User(PySpringModel, table=True):
-    __tablename__: str = "user"
+    __tablename__: str = "app_user"
     id: Optional[int] = Field(default=None, primary_key=True)
     user_name: str
     email: EmailStr = Field(unique=True)
