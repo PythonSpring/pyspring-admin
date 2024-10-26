@@ -1,12 +1,14 @@
 from typing import Annotated, Any
 
-from fastapi import Depends
+from fastapi import Depends, Request
 from py_spring_core import RestController
 
 from py_spring_admin.core.controller.depends_utils import (
-    admin_required,
     get_current_user,
+    require_role
 )
+from py_spring_admin.core.repository.commons import UserRole
+from py_spring_admin.core.repository.models import User
 from py_spring_admin.core.repository.user_service import UserService
 from py_spring_admin.core.service.auth_service import JWTUser
 from py_spring_admin.core.service.model_service import (
@@ -44,7 +46,7 @@ class ModelController(RestController):
             )
 
         @self.router.post("/models/{table_name}")
-        @admin_required
+        @require_role(UserRole.Admin)
         def add_model_into_table(
             user: Annotated[JWTUser, Depends(get_current_user)],
             table_name: str,
@@ -55,7 +57,7 @@ class ModelController(RestController):
             )
 
         @self.router.delete("/models/{table_name}")
-        @admin_required
+        @require_role(UserRole.Admin)
         def delete_model_from_table(
             user: Annotated[JWTUser, Depends(get_current_user)],
             table_name: str,
@@ -66,7 +68,7 @@ class ModelController(RestController):
             )
 
         @self.router.put("/models/{table_name}")
-        @admin_required
+        @require_role(UserRole.Admin)
         def update_model_in_table(
             user: Annotated[JWTUser, Depends(get_current_user)],
             table_name: str,
@@ -76,3 +78,9 @@ class ModelController(RestController):
             return self.model_service.update_model_in_table(
                 table_name, primary_key_ids_query, updated_model_json_dict
             )
+        
+        @self.router.get("/test")
+        @require_role(UserRole.Admin)
+        def test(request: Request) -> None:
+            ...
+    

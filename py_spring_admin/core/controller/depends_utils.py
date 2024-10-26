@@ -1,11 +1,11 @@
 import functools
-from typing import Any, Callable
+from typing import Any, Callable, Optional, Type, cast
 
+import cachetools
 from fastapi import Request
-from loguru import logger
 
 from py_spring_admin.core.repository.commons import UserRole
-from py_spring_admin.core.service.auth_service import InvalidAdminUserError, JWTUser
+from py_spring_admin.core.service.auth_service import PermissionDeniedError, JWTUser
 
 
 def get_current_user(request: Request) -> JWTUser:
@@ -22,26 +22,66 @@ def get_current_user(request: Request) -> JWTUser:
     return user
 
 
-def admin_required(func: Callable[..., Any]) -> Callable[..., Any]:
+@cachetools.cached(cache={})
+def __find_type_in_params(func: Callable[..., Any], target_type: Type[Any]) -> Optional[str]:
     """
-    Decorator to ensure that the user has admin privileges.
-    This decorator checks if the user provided in the keyword arguments has an admin role.
-    If the user is not found or does not have admin privileges, it raises an InvalidAdminUserError.
-    # Usage:
-        @admin_required
-        def some_admin_function(user: Annotated[JWTUser, Depends(get_current_user)], ...):
+    Finds the name of the parameter in the given function that matches the specified type.
+    
+    Args:
+        func (Callable[..., Any]): The function to inspect.
+        target_type (Type[Any]): The type to search for in the function parameters.
+    
+    Returns:
+        Optional[str]: The name of the parameter that matches the target type, or `None` if no match is found.
+    """
+    for attr, param_type in func.__annotations__.items():
+        if issubclass(param_type, target_type):
+            return attr
+    return None
+
+def require_in_roles(roles: list[str | UserRole]) -> Callable[..., Any]:
+    """
+    Decorator that requires the current user to have one or more of the specified roles.
+    
+    This decorator checks if the user provided in the keyword arguments has one of the required roles.
+    If the user is not found or does not have any of the required roles, it raises a PermissionDeniedError.
+    
+    Usage:
+        from fastapi import Request
+
+        @require_in_roles([UserRole.Admin, UserRole.Manager])
+        def some_admin_or_manager_function(request: Request], ...):
             ...
     """
-
-    @functools.wraps(func)
-    def wrapper(*args, **kwargs):
-        user = kwargs.get("user", None)
-        if user is None:
-            raise InvalidAdminUserError("[INVALID USER] User is not found")
-        if user["role"] != UserRole.Admin.value:
-            raise InvalidAdminUserError("[INVALID USER] User is not admin")
-
-        logger.info(f"[ADMIN USER GRANTED] User: {user} is admin, access granted")
-        return func(*args, **kwargs)
-
+        
+    def wrapper(func: Callable[..., Any]) -> Callable[..., Any]:
+        @functools.wraps(func)
+        def inner_wrapper(*args, **kwargs):
+            param_name = __find_type_in_params(func, Request)
+            if param_name is None:
+                raise ValueError("Request parameter not found in function annotations")
+            request: Request = cast(Request, kwargs.get(param_name))
+            user: JWTUser = request.state.user
+            for role in roles:
+                if user["role"] == role:
+                    return func(*args, **kwargs)
+            raise PermissionDeniedError(f"User does not have the required role: {role}")
+        return inner_wrapper
     return wrapper
+
+
+def require_role(role: str | UserRole) -> Callable[..., Any]:
+    """
+    Decorator that requires the current user to have the specified role.
+    
+    This decorator checks if the user provided in the keyword arguments has the required role.
+    If the user is not found or does not have the required role, it raises a PermissionDeniedError.
+    
+    Usage:
+        from fastapi import Request
+
+        @require_role(UserRole.Admin)
+        def some_admin_function(request: Request], ...):
+            ...
+    """
+    return require_in_roles([role])

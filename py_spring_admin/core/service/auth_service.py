@@ -26,7 +26,7 @@ class AdminSecurityProperties(Properties):
     secret: str = Field(default_factory=lambda: str(uuid4()))
 
 
-class InvalidAdminUserError(Exception): ...
+class PermissionDeniedError(Exception): ...
 
 
 class UserNotFoundError(Exception): ...
@@ -87,7 +87,7 @@ class AuthService(Component):
             raise UserNotFoundError("[USER NOT FOUND] User not found")
 
         if not self.__is_correct_password(password, optional_user.password):
-            raise InvalidAdminUserError("[INVALID USER PASSWORD] Password is incorrect")
+            raise PermissionDeniedError("[INVALID USER PASSWORD] Password is incorrect")
 
         return self.__issue_token(optional_user.model_dump())
 
