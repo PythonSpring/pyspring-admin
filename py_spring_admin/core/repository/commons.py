@@ -4,12 +4,15 @@ from typing import Optional
 from pydantic import BaseModel
 
 
-class UserRole(str, Enum):
+class StrEnum(str, Enum):
+    ...
+
+class UserRole(StrEnum):
     Admin = "admin"
     Guest = "guest"
 
 
 class UserRead(BaseModel):
     id: Optional[int]
-    role: UserRole
+    role: str
     user_name: str

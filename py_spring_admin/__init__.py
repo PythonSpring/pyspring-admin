@@ -1,4 +1,5 @@
 from py_spring_admin.core.py_spring_admin_provider import provide_py_spring_admin
 from py_spring_admin.core.controller.depends_utils import require_in_roles, require_role
+from py_spring_admin.core.repository.commons import UserRole
 
 from py_spring_admin.dev.test_tables_provider import provide_test_tables

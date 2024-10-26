@@ -4,7 +4,7 @@ from typing import Any, Callable, Optional, Type, cast
 import cachetools
 from fastapi import Request
 
-from py_spring_admin.core.repository.commons import UserRole
+from py_spring_admin.core.repository.commons import StrEnum
 from py_spring_admin.core.service.auth_service import PermissionDeniedError, JWTUser
 
 
@@ -39,7 +39,7 @@ def __find_type_in_params(func: Callable[..., Any], target_type: Type[Any]) -> O
             return attr
     return None
 
-def require_in_roles(roles: list[str | UserRole]) -> Callable[..., Any]:
+def require_in_roles(roles: list[StrEnum]) -> Callable[..., Any]:
     """
     Decorator that requires the current user to have one or more of the specified roles.
     
@@ -70,7 +70,7 @@ def require_in_roles(roles: list[str | UserRole]) -> Callable[..., Any]:
     return wrapper
 
 
-def require_role(role: str | UserRole) -> Callable[..., Any]:
+def require_role(role: StrEnum) -> Callable[..., Any]:
     """
     Decorator that requires the current user to have the specified role.
     
