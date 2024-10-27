@@ -4,8 +4,8 @@ from typing import Callable, ClassVar
 from fastapi import Request, status
 from fastapi.responses import JSONResponse
 from loguru import logger
-
 from py_spring_core import Properties
+
 from py_spring_admin.core.controller.commons import HTTPMethod
 from py_spring_admin.core.controller.middleware.middleware_base import MiddlewareBase
 from py_spring_admin.core.service.auth_service import AuthService
@@ -15,10 +15,11 @@ class AuthMiddlewareProperties(Properties):
     __key__ = "auth_middleware"
     excluded_routes: list[str]
 
+
 class AuthMiddleware(MiddlewareBase):
     auth_service: AuthService
     auth_middleware_properties: AuthMiddlewareProperties
-    
+
     COOKIE_NAME: ClassVar[str] = "jwt"
 
     def __init__(self) -> None:
@@ -28,9 +29,12 @@ class AuthMiddleware(MiddlewareBase):
             "/favicon.ico",
             "/openapi.json",
         ]
+
     def post_construct(self) -> None:
         additional_excluded_routes = self.auth_middleware_properties.excluded_routes
-        logger.info(f"[AUTH MIDDLEWARE] Extending excluded routes: {additional_excluded_routes}")
+        logger.info(
+            f"[AUTH MIDDLEWARE] Extending excluded routes: {additional_excluded_routes}"
+        )
         self.excluded_routes.extend(additional_excluded_routes)
 
     async def __call__(self, request: Request, call_next: Callable):

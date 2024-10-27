@@ -5,7 +5,10 @@ from py_spring_admin.core.controller.admin_site_static_file_controller import (
     AdminSiteStaticFileController,
 )
 from py_spring_admin.core.controller.auth_controller import AdminAuthController
-from py_spring_admin.core.controller.middleware.auth_middleware import AuthMiddleware, AuthMiddlewareProperties
+from py_spring_admin.core.controller.middleware.auth_middleware import (
+    AuthMiddleware,
+    AuthMiddlewareProperties,
+)
 from py_spring_admin.core.controller.middleware.exception_middleware import (
     ExceptionMiddleware,
 )
@@ -46,16 +49,16 @@ def provide_py_spring_admin() -> EntityProvider:
             OtpService,
         ],
         properties_classes=[
-            AdminUserProperties, 
-            AdminSecurityProperties, 
+            AdminUserProperties,
+            AdminSecurityProperties,
             AuthMiddlewareProperties,
-            SmtpProperties
+            SmtpProperties,
         ],
         bean_collection_classes=[SecurityBeanCollection],
         rest_controller_classes=[
             AdminMainController,
             AdminAuthController,
-            ModelController
+            ModelController,
         ],
         extneral_dependencies=[User],
     )

@@ -3,10 +3,7 @@ from typing import Annotated, Any
 from fastapi import Depends, Request
 from py_spring_core import RestController
 
-from py_spring_admin.core.controller.depends_utils import (
-    get_current_user,
-    require_role
-)
+from py_spring_admin.core.controller.depends_utils import get_current_user, require_role
 from py_spring_admin.core.repository.commons import UserRole
 from py_spring_admin.core.repository.models import User
 from py_spring_admin.core.repository.user_service import UserService
@@ -78,4 +75,3 @@ class ModelController(RestController):
             return self.model_service.update_model_in_table(
                 table_name, primary_key_ids_query, updated_model_json_dict
             )
-    

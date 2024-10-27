@@ -1,4 +1,4 @@
-HtmlEmailTemplate: str = r"""
+RESET_PASSWORD_EMAIL_HTML_TEMPLATE: str = r"""
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -63,10 +63,9 @@ HtmlEmailTemplate: str = r"""
 </html>
 """
 
+
 def create_reset_password_email_template(
-        user_name: str, 
-        one_time_password: str, 
-        company_name: str
+    user_name: str, one_time_password: str, company_name: str
 ) -> str:
     """
     Creates an HTML email template for a password reset request.
@@ -80,7 +79,7 @@ def create_reset_password_email_template(
         str: The HTML email template with the provided values.
     """
     return (
-        HtmlEmailTemplate.replace("{{user_name}}", user_name)
-                         .replace("{{otp_code}}", one_time_password)
-                         .replace("{{company_name}}", company_name)
+        RESET_PASSWORD_EMAIL_HTML_TEMPLATE.replace("{{user_name}}", user_name)
+        .replace("{{otp_code}}", one_time_password)
+        .replace("{{company_name}}", company_name)
     )
