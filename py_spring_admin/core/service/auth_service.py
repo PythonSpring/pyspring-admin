@@ -33,7 +33,6 @@ class JWTUser(TypedDict):
 class AdminSecurityProperties(Properties):
     __key__ = "admin_security"
     secret: str = Field(default_factory=lambda: str(uuid4()))
-    user_password_reset_link_template: str
 
 
 class PermissionDeniedError(Exception): ...
@@ -138,18 +137,6 @@ class AuthService(Component):
         self.uesr_service.update_user_password(user_email, new_password)
         logger.info(f"[DELETE OTP] Deleting OTP for user: {user_email}")
         self.otp_service.delete_otp(user_email)
-
-    def _create_resset_password_link(self, user_id: int) -> str:
-        schema_dict = ResetPasswordSchema(
-            id=user_id, expired_at=datetime.datetime.now() + datetime.timedelta(days=1)
-        ).model_dump()
-
-        reset_link = (
-            self.admin_security_properties.user_password_reset_link_template.format(
-                token=self.__issue_token(schema_dict)
-            )
-        )
-        return reset_link
 
     def _create_reset_email_mesage(
         self, one_time_password: str, company_name: str, user_name: str, user_email: str
