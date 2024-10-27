@@ -28,7 +28,7 @@ class OtpService(Component):
         code = self._generate_otp()
         password = OneTimePassword(
             code=code,
-            expired_at=datetime.datetime.now() + datetime.timedelta(minutes=3),
+            expired_at=datetime.datetime.now() + datetime.timedelta(minutes=5),
         )
         self.one_time_password_cache[_id] = password
         return password

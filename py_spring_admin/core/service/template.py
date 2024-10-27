@@ -50,7 +50,7 @@ RESET_PASSWORD_EMAIL_HTML_TEMPLATE: str = r"""
         <p>We received a request to reset your password. Use the code below to complete the reset process:</p>
         
         <div class="verification-code">{{otp_code}}</div>
-        <p>Please enter this code on the password reset form. This code will expire in 1 hour.</p>
+        <p>Please enter this code on the password reset form. This code will expire in 5 minutes.</p>
         
         <p>If you did not request a password reset, please ignore this email.</p>
         <p>Thanks,<br>The {{company_name}} Team</p>
