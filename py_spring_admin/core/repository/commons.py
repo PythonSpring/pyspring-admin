@@ -1,7 +1,8 @@
 from enum import Enum
+import  datetime
 from typing import Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class StrEnum(str, Enum):
@@ -16,3 +17,7 @@ class UserRead(BaseModel):
     id: Optional[int]
     role: str
     user_name: str
+
+class ResetPasswordSchema(BaseModel):
+    id: int
+    expired_at: datetime.datetime = Field(serialization_alias= "exp")

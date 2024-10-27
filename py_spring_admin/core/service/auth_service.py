@@ -1,20 +1,28 @@
+import datetime
+from email.message import EmailMessage
 import logging
-from typing import Any, Optional
+from typing import Any, Optional, Type, TypeVar
 from uuid import uuid4
 
 import jwt
 from loguru import logger
 from passlib.context import CryptContext
 from py_spring_core import Component, Properties, BeanCollection
-from pydantic import Field
+from pydantic import BaseModel, Field, ValidationError
 from typing_extensions import TypedDict
 
-from py_spring_admin.core.repository.commons import UserRead
+from py_spring_admin.core.repository.commons import ResetPasswordSchema, UserRead
 from py_spring_admin.core.repository.models import User
 from py_spring_admin.core.repository.user_service import UserService
+from py_spring_admin.core.service.otp_service import InvalidOtpError, OtpService
+import py_spring_admin.core.service.template as template
+from py_spring_admin.core.service.smtp_service import EmailContentType, SmtpService
 
 JsonWebToken = str
+IsResetPasswordSuccess = bool
+IsSendEmailSuccess = bool
 
+T = TypeVar("T", bound= BaseModel)
 
 class JWTUser(TypedDict):
     id: int
@@ -24,6 +32,7 @@ class JWTUser(TypedDict):
 class AdminSecurityProperties(Properties):
     __key__ = "admin_security"
     secret: str = Field(default_factory=lambda: str(uuid4()))
+    user_password_reset_link_template: str
 
 
 class PermissionDeniedError(Exception): ...
@@ -34,6 +43,7 @@ class UserNotFoundError(Exception): ...
 
 class SecurityBeanCollection(BeanCollection):
     admin_security_properties: AdminSecurityProperties
+    
 
     @classmethod
     def create_bcrypt_password_context(cls) -> CryptContext:
@@ -69,7 +79,9 @@ class AuthService(Component):
 
     admin_security_properties: AdminSecurityProperties
     uesr_service: UserService
+    smtp_service: SmtpService
     password_context: CryptContext
+    otp_service: OtpService
 
     def post_construct(self) -> None:
         logging.getLogger("passlib").setLevel(logging.ERROR)  # Hide passlib logs
@@ -98,6 +110,65 @@ class AuthService(Component):
     def user_login_by_email(self, email: str, password: str) -> JsonWebToken:
         optional_user = self.uesr_service.find_user_by_email(email)
         return self.__login_user(optional_user, password)
+    
+    def send_reset_user_password_email(self, email: str) -> IsSendEmailSuccess:
+        optional_user = self.uesr_service.find_user_by_email(email)
+        if optional_user is None:
+            raise UserNotFoundError(f"[USER NOT FOUND] User email: {email} not found")
+        otp = self.otp_service.get_otp(optional_user.email)
+        reset_password_email = self._create_reset_email_mesage(
+            otp.code,
+            self.smtp_service.get_company_name(),
+            optional_user.user_name,
+            optional_user.email, 
+        )
+        return self.smtp_service.async_send_email(reset_password_email)
+    
+    def validate_reset_password_otp(self, email: str, code: str) -> Optional[InvalidOtpError]:
+        return self.otp_service.validate_otp(email, code)
+    
+    def update_user_password(self, user_email: str, new_password: str, password_for_confirmation: str) -> None:
+        if new_password != password_for_confirmation:
+            raise ValueError("Passwords do not match")
+        logger.info(f"[PASSWORD UPDATE] Updating password for user: {user_email}")
+        self.uesr_service.update_user_password(user_email, new_password)
+        logger.info(f"[DELETE OTP] Deleting OTP for user: {user_email}")
+        self.otp_service.delete_otp(user_email)
+
+    
+    def _create_resset_password_link(self, user_id: int) -> str:
+
+        schema_dict = ResetPasswordSchema(
+            id=user_id,
+            expired_at=datetime.datetime.now() + datetime.timedelta(days=1)
+        ).model_dump()
+
+        reset_link = self.admin_security_properties.user_password_reset_link_template.format(
+            token=self.__issue_token(schema_dict)
+        )
+        return reset_link
+    
+    def _create_reset_email_mesage(self,
+                                   one_time_password: str,
+                                   company_name: str,
+                                   user_name: str, 
+                                   user_email: str
+        ) -> EmailMessage:
+        email_template = template.create_reset_password_email_template(
+            company_name=company_name,
+            user_name=user_name,
+            one_time_password= one_time_password
+        )
+        reset_password_email = self.smtp_service.create_email_message(
+            receiver_email=user_email,
+            subject="Reset Password",
+            content= email_template,
+            content_type= EmailContentType.HTML
+        )
+        return reset_password_email
+    
+    
+
 
     def get_user_from_jwt(self, token: str) -> Optional[UserRead]:
         """
@@ -125,3 +196,11 @@ class AuthService(Component):
         return jwt.encode(
             payload, self.admin_security_properties.secret, algorithm="HS256"
         )
+    
+    def __decode_token_returning_model(self, token: str, model: Type[T]) -> Optional[T]:
+        payload = jwt.decode(token, self.admin_security_properties.secret, algorithms=["HS256"])
+        try:
+            return model.model_validate(payload)
+        except ValidationError as validation_error:
+            logger.error(validation_error)
+            return

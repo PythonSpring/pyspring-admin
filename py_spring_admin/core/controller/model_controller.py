@@ -78,9 +78,4 @@ class ModelController(RestController):
             return self.model_service.update_model_in_table(
                 table_name, primary_key_ids_query, updated_model_json_dict
             )
-        
-        @self.router.get("/test")
-        @require_role(UserRole.Admin)
-        def test(request: Request) -> None:
-            ...
     

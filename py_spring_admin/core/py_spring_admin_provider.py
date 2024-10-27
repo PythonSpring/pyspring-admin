@@ -20,6 +20,8 @@ from py_spring_admin.core.service.auth_service import (
     SecurityBeanCollection,
 )
 from py_spring_admin.core.service.model_service import ModelService
+from py_spring_admin.core.service.otp_service import OtpService
+from py_spring_admin.core.service.smtp_service import SmtpProperties, SmtpService
 
 
 def provide_py_spring_admin() -> EntityProvider:
@@ -40,11 +42,14 @@ def provide_py_spring_admin() -> EntityProvider:
             ExceptionMiddleware,
             AuthMiddleware,
             ModelService,
+            SmtpService,
+            OtpService,
         ],
         properties_classes=[
             AdminUserProperties, 
             AdminSecurityProperties, 
-            AuthMiddlewareProperties
+            AuthMiddlewareProperties,
+            SmtpProperties
         ],
         bean_collection_classes=[SecurityBeanCollection],
         rest_controller_classes=[

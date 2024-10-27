@@ -22,6 +22,12 @@ class EmailCredential(CredentialContext):
 class UserNameCredential(CredentialContext):
     user_name: str
 
+class ResetPasswordSchema(BaseModel):
+    email: str
+    code: str
+    new_password: str
+    password_for_confirmation: str
+
 
 CredentialType = Optional[EmailCredential | UserNameCredential]
 
@@ -80,6 +86,28 @@ class AdminAuthController(RestController):
             return LoginResponse(
                 user=optional_user, message="User found", status=status.HTTP_200_OK
             )
+        
+        @self.router.post("/send_reset_password_email")
+        def send_reset_password_email(email: str) -> JSONResponse:
+            self.auth_service.send_reset_user_password_email(email)
+            return self._create_json_response(
+                "Reset password email sent", status_code=status.HTTP_202_ACCEPTED
+            )
+            
+        @self.router.post("/reset_password")
+        def reset_password(schema: ResetPasswordSchema) -> JSONResponse:
+            optional_error = self.auth_service.validate_reset_password_otp(schema.email, schema.code)
+            if optional_error is not None:
+                return self._create_json_response(
+                    str(optional_error), status_code=status.HTTP_403_FORBIDDEN
+                )
+            self.auth_service.update_user_password(
+                schema.email, schema.new_password, schema.password_for_confirmation
+            )
+
+            response = self._create_json_response("Reset password success, please re-login")
+            response.delete_cookie(key=self.COOKIE_NAME)
+            return response
 
     def _handle_token_from_credential(self, credential: CredentialType) -> str:
         if credential is None:
