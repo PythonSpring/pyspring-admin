@@ -24,3 +24,7 @@ build-backend = "pdm.backend"
 [tool.pdm]
 version = { source = "file", path = "py_spring_admin/__init__.py" }
 distribution = true
+[tool.pdm.dev-dependencies]
+dev = [
+    "ruff>=0.7.1",
+]
