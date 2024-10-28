@@ -65,6 +65,10 @@ def require_in_roles(roles: list[StrEnum]) -> Callable[..., Any]:
                 raise ValueError("Request parameter not found in function annotations")
             request: Request = cast(Request, kwargs.get(param_name))
             user: JWTUser = request.state.user
+            
+            if not user["is_verified"]:
+                raise PermissionDeniedError("User email is not verified")
+
             for role in roles:
                 if user["role"] == role:
                     return func(*args, **kwargs)

@@ -1,3 +1,4 @@
+from collections import defaultdict
 import datetime
 import random
 from typing import Optional
@@ -5,6 +6,12 @@ from typing import Optional
 from py_spring_core import Component
 from pydantic import BaseModel
 
+from py_spring_admin.core.repository.commons import StrEnum
+
+class OtpPurpose(StrEnum):
+    PasswordReset = "password_reset"
+    UserRegistration = "user_registration"
+    
 
 class OneTimePassword(BaseModel):
     code: str
@@ -22,21 +29,27 @@ class OtpService(Component):
     """
 
     def __init__(self) -> None:
-        self.one_time_password_cache: dict[str, OneTimePassword] = {}
+        self.one_time_password_cache: dict[str, dict[OtpPurpose, OneTimePassword]] = defaultdict(dict)
 
-    def get_otp(self, _id: str) -> OneTimePassword:
+    def get_otp(self, purpose: OtpPurpose, _id: str) -> OneTimePassword:
         code = self._generate_otp()
         password = OneTimePassword(
             code=code,
             expired_at=datetime.datetime.now() + datetime.timedelta(minutes=5),
         )
-        self.one_time_password_cache[_id] = password
+        self.one_time_password_cache[_id][purpose] = password
         return password
 
-    def validate_otp(self, _id: str, code: str) -> Optional[InvalidOtpError]:
-        optional_password = self.one_time_password_cache.get(_id)
-        if optional_password is None:
+    def validate_otp(self, _id: str, purpose: OtpPurpose ,code: str) -> Optional[InvalidOtpError]:
+        optional_otps = self.one_time_password_cache.get(_id)
+
+        if optional_otps is None:
             return InvalidOtpError("OTP not found")
+        
+        optional_password = optional_otps.get(purpose)
+        if optional_password is None:
+            return InvalidOtpError(f"OTP for purpose: {purpose} not found")
+        
         is_expired = optional_password.expired_at < datetime.datetime.now()
         if is_expired:
             return InvalidOtpError("OTP is expired")

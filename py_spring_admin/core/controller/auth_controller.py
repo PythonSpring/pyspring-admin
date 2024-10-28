@@ -9,6 +9,7 @@ from pydantic import BaseModel, Field
 from py_spring_admin.core.repository.commons import UserRead
 from py_spring_admin.core.repository.user_service import RegisterUser, UserService
 from py_spring_admin.core.service.auth_service import AuthService
+from py_spring_admin.core.service.otp_service import OtpPurpose
 
 
 class CredentialContext(BaseModel):
@@ -23,9 +24,17 @@ class UserNameCredential(CredentialContext):
     user_name: str
 
 
-class ResetPasswordSchema(BaseModel):
+
+
+
+class OtpVerificationSchema(BaseModel):
     email: str
     code: str
+
+
+class ResetPasswordSchema(BaseModel):
+    email: str
+    code: str # TODO: moe this to separate function to check code.
     new_password: str
     password_for_confirmation: str
 
@@ -94,11 +103,45 @@ class AdminAuthController(RestController):
             return self._create_json_response(
                 "Reset password email sent", status_code=status.HTTP_202_ACCEPTED
             )
+        
+        @self.router.post("/resend_user_verification_email")
+        def send_user_verification_email(email: str) -> JSONResponse:
+            self.auth_service.send_user_verification_email(email)
+            return self._create_json_response(
+                "Verification email sent", status_code=status.HTTP_202_ACCEPTED
+            )
+        
+        
+        
+        @self.router.post("/verify_user_email")
+        def verify_email(schema: OtpVerificationSchema) -> JSONResponse:
+            optional_error = self.auth_service.validate_otp(
+                OtpPurpose.UserRegistration, schema.email, schema.code
+            )
+            if optional_error is not None:
+                return self._create_json_response(
+                    str(optional_error), status_code=status.HTTP_403_FORBIDDEN
+                )
+            
+            self.user_service.update_user_email_verified(schema.email)
+            return self._create_json_response("Email verified successfully")
+        
+        @self.router.post("/validate_otp/{purpose}")
+        def validate_otp(schema: OtpVerificationSchema, purpose: OtpPurpose) -> JSONResponse:
+            optional_error = self.auth_service.validate_otp(
+                purpose, schema.email, schema.code
+            )
+            if optional_error is not None:
+                return self._create_json_response(
+                    str(optional_error), status_code=status.HTTP_403_FORBIDDEN
+                )
+            return self._create_json_response("OTP validated successfully")
+            
 
         @self.router.post("/reset_password")
         def reset_password(schema: ResetPasswordSchema) -> JSONResponse:
-            optional_error = self.auth_service.validate_reset_password_otp(
-                schema.email, schema.code
+            optional_error = self.auth_service.validate_otp(
+                OtpPurpose.PasswordReset, schema.email, schema.code
             )
             if optional_error is not None:
                 return self._create_json_response(

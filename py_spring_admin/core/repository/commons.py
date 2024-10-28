@@ -17,6 +17,7 @@ class UserRead(BaseModel):
     id: Optional[int]
     role: str
     user_name: str
+    is_verified: bool
 
 
 class ResetPasswordSchema(BaseModel):

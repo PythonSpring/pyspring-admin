@@ -15,6 +15,7 @@ class User(PySpringModel, table=True):
     email: EmailStr = Field(unique=True)
     password: Annotated[str, ReadOnly] = Field(exclude=True)
     role: str = Field(default=UserRole.Guest)
+    is_verified: bool = Field(default=False)
 
     def as_read(self) -> UserRead:
-        return UserRead(id=self.id, role=self.role, user_name=self.user_name)
+        return UserRead(id=self.id, role=self.role, user_name=self.user_name, is_verified=self.is_verified)

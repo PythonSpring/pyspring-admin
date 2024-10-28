@@ -6,10 +6,13 @@ from py_spring_core import Component
 from py_spring_model import PySpringModel
 from pydantic import BaseModel
 
+from py_spring_core.core.entities.component import Component
+from pydantic import BaseModel
+from passlib.context import CryptContext
 from py_spring_admin.core.repository.commons import UserRead
 from py_spring_admin.core.repository.models import User, UserRole
 from py_spring_admin.core.repository.user_repository import UserRepository
-
+from py_spring_model import PySpringModel
 
 class RegisterUser(BaseModel):
     user_name: str
@@ -46,6 +49,20 @@ class UserService(Component):
             user_read = optional_user.as_read()
 
         return user_read
+    
+    def update_user_email_verified(self, user_email: str) -> UserRead:
+        with PySpringModel.create_managed_session() as session:
+            _, optional_user = self.user_repo._find_by_query(
+                {"email": user_email}, session
+            )
+            if optional_user is None:
+                raise ValueError("User not found")
+            optional_user.is_verified = True
+            logger.info(f"User email verified: {optional_user}")
+            user_read = optional_user.as_read()
+
+        return user_read
+        ...
 
     def register_user(self, new_user: RegisterUser) -> User:
         hashed_password = self.get_hashed_password(new_user.password)
