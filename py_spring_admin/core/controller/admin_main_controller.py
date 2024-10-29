@@ -23,6 +23,8 @@ class AdminMainController(RestController):
         )
 
     def register_middlewares(self) -> None:
-        self.enable_cors()
         self.app.middleware("http")(self.auth_middleware)
         self.app.middleware("http")(self.exception_middleware)
+
+        # cors should be  enabled after middleware registration
+        self.enable_cors()
