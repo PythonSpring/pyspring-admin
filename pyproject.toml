@@ -13,6 +13,7 @@ dependencies = [
     "py-spring-model @ git+https://github.com/PythonSpring/pyspring-model.git@c18753a0c0cf8632f4f0232b1bf5273f44d0ca9c",
     "psycopg2-binary>=2.9.9",
     "cryptography>=43.0.3",
+    "setuptools>=75.3.0"
 ]
 requires-python = ">=3.10"
 readme = "README.md"

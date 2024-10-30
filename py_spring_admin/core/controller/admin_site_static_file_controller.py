@@ -1,8 +1,7 @@
 from typing import ClassVar
-
+import pkg_resources
 from fastapi.staticfiles import StaticFiles
 from py_spring_core import RestController
-
 
 class AdminSiteStaticFileController(RestController):
     """
@@ -37,7 +36,8 @@ class AdminSiteStaticFileController(RestController):
     By setting the correct base URL, all frontend assets and routes will be properly served by the FastAPI application.
     """
 
-    DIST_DIR: ClassVar[str] = "py_spring_admin/core/controller/static/_dist"
+    # Update the DIST_DIR to use pkg_resources
+    DIST_DIR: ClassVar[str] = pkg_resources.resource_filename(__name__, "static/_dist")
 
     def register_routes(self) -> None:
         self.app.mount(
