@@ -21,6 +21,7 @@ class RegisterUser(BaseModel):
     password: str
     email: str
     role: UserRole = UserRole.Guest
+    is_verified: bool
 
 
 class UserService(Component):
@@ -73,11 +74,15 @@ class UserService(Component):
                 raise UserAlreadyRegistered(StatusCode.UserAlreadyRegisteredAndVerified)
             else:
                 raise UserAlreadyRegistered(StatusCode.UserAlreadyRegisteredAndUnverified)
-        hashed_password = self.get_hashed_password(new_user.password)
+        hashed_password = ""
+        if len(new_user.password) != 0:
+            hashed_password = self.get_hashed_password(new_user.password)
+
         user = User(
             user_name=new_user.user_name,
             password=hashed_password,
             email=new_user.email,
             role=new_user.role,
+            is_verified=new_user.is_verified,
         )
         return self.user_repo.save(user)

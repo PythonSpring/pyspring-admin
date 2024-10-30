@@ -72,7 +72,7 @@ class AdminAuthController(RestController):
             request: Request, credential: CredentialType = None
         ) -> JSONResponse:
             base_response = JSONResponse(content="Login success")
-            if self.__validate_jwt_for_existing_users(request):
+            if self._validate_jwt_for_existing_users(request):
                 return base_response
             token = self._handle_token_from_credential(credential)
             base_response.set_cookie(key=self.COOKIE_NAME, value=token)
@@ -93,7 +93,8 @@ class AdminAuthController(RestController):
 
         @self.router.get("/user")
         def get_current_user(request: Request) -> LoginResponse:
-            optional_user = self.__get_user_from_cookies(request)
+            optional_user = self._get_user_from_cookies(request)
+
             if optional_user is None:
                 return LoginResponse(
                     message="Login required", status=status.HTTP_401_UNAUTHORIZED
@@ -210,10 +211,10 @@ class AdminAuthController(RestController):
             )
         return token
 
-    def __validate_jwt_for_existing_users(self, request: Request) -> bool:
-        return self.__get_user_from_cookies(request) is not None
+    def _validate_jwt_for_existing_users(self, request: Request) -> bool:
+        return self._get_user_from_cookies(request) is not None
 
-    def __get_user_from_cookies(self, request: Request) -> Optional[UserRead]:
+    def _get_user_from_cookies(self, request: Request) -> Optional[UserRead]:
         optional_jwt = request.cookies.get(self.COOKIE_NAME)
         if optional_jwt is None:
             return

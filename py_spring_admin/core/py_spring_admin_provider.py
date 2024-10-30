@@ -13,6 +13,7 @@ from py_spring_admin.core.controller.middleware.exception_middleware import (
     ExceptionMiddleware,
 )
 from py_spring_admin.core.controller.model_controller import ModelController
+from py_spring_admin.core.controller.vendor.google_auth_controller import GoogleAuthController
 from py_spring_admin.core.py_spring_admin import AdminUserProperties, PySpringAdmin
 from py_spring_admin.core.repository.models import User
 from py_spring_admin.core.repository.user_repository import UserRepository
@@ -25,6 +26,7 @@ from py_spring_admin.core.service.auth_service import (
 from py_spring_admin.core.service.model_service import ModelService
 from py_spring_admin.core.service.otp_service import OtpService
 from py_spring_admin.core.service.smtp_service import SmtpProperties, SmtpService
+from py_spring_admin.core.service.vendor.google_auth_service import GoogleAuthService
 
 
 def provide_py_spring_admin() -> EntityProvider:
@@ -42,6 +44,7 @@ def provide_py_spring_admin() -> EntityProvider:
             UserRepository,
             UserService,
             AuthService,
+            GoogleAuthService,
             ExceptionMiddleware,
             AuthMiddleware,
             ModelService,
@@ -59,6 +62,7 @@ def provide_py_spring_admin() -> EntityProvider:
             AdminMainController,
             AdminAuthController,
             ModelController,
+            GoogleAuthController
         ],
         extneral_dependencies=[User],
     )

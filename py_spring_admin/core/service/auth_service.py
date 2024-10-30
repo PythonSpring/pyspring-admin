@@ -15,17 +15,13 @@ from typing_extensions import TypedDict
 
 from py_spring_admin.core.service.errors import PasswordDoesNotMatch, UserNotFound
 import py_spring_admin.core.service.template as template
-from py_spring_admin.core.repository.commons import ResetPasswordSchema, UserRead
+from py_spring_admin.core.repository.commons import UserRead
 from py_spring_admin.core.repository.models import User
 from py_spring_admin.core.repository.user_service import UserService
 from py_spring_admin.core.service.otp_service import InvalidOtpError, OtpPurpose, OtpService
 from py_spring_admin.core.service.smtp_service import EmailContentType, SmtpService
+from py_spring_admin.core.service.commons import JsonWebTokenEncrypted, Token, IsSendEmailSuccess, JsonWebToken
 
-JsonWebTokenEncrypted= str
-JsonWebToken = str
-Token = JsonWebToken | JsonWebTokenEncrypted
-IsResetPasswordSuccess = bool
-IsSendEmailSuccess = bool
 
 T = TypeVar("T", bound=BaseModel)
 
@@ -33,6 +29,7 @@ T = TypeVar("T", bound=BaseModel)
 class JWTUser(TypedDict):
     id: int
     role: str
+    user_name: str
     is_verified: bool
 
 
@@ -100,7 +97,7 @@ class AuthService(Component):
 
     def __login_user(
         self, optional_user: Optional[User], password: str
-    ) -> JsonWebTokenEncrypted:
+    ) -> JsonWebToken:
         if optional_user is None:
             raise UserNotFound()
 
@@ -108,12 +105,31 @@ class AuthService(Component):
             raise PasswordDoesNotMatch()
 
         return self.issue_token(optional_user.model_dump(), is_encrypted= False)
+    
+    def user_login_by_user_name_without_password(self, user: User) -> JsonWebToken:
+        """
+        Authenticates a user by their username without requiring a password, and issues a JSON Web Token (JWT) for the authenticated user.
+        
+        This method is intended for use with OAuth login flows, where the user's identity is already verified by an external authentication provider.
+        
+        Args:
+            user_name (str): The username of the user to authenticate.
+        
+        Returns:
+            JsonWebToken: A JSON Web Token representing the authenticated user.
+        
+        Raises:
+            UserNotFound: If the user with the provided username does not exist.
+        """
+        
+        return self.issue_token(user.model_dump(), is_encrypted= False)
 
-    def user_login_by_user_name(self, user_name: str, password: str) -> JsonWebTokenEncrypted:
+
+    def user_login_by_user_name(self, user_name: str, password: str) -> JsonWebToken:
         optional_user = self.uesr_service.find_user_by_user_name(user_name)
         return self.__login_user(optional_user, password)
 
-    def user_login_by_email(self, email: str, password: str) -> JsonWebTokenEncrypted:
+    def user_login_by_email(self, email: str, password: str) -> JsonWebToken:
         optional_user = self.uesr_service.find_user_by_email(email)
         return self.__login_user(optional_user, password)
     
