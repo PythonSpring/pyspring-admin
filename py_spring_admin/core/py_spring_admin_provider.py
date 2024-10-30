@@ -62,7 +62,8 @@ def provide_py_spring_admin() -> EntityProvider:
             AdminMainController,
             AdminAuthController,
             ModelController,
-            GoogleAuthController
+            GoogleAuthController,
+            AdminSiteStaticFileController
         ],
         extneral_dependencies=[User],
     )

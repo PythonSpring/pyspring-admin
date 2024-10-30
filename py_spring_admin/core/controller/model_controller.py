@@ -3,7 +3,7 @@ from typing import Annotated, Any
 from fastapi import Depends, Request
 from py_spring_core import RestController
 
-from py_spring_admin.core.controller.depends_utils import get_current_user, require_role
+from py_spring_admin.core.controller.depends_utils import get_current_user, require_in_roles, require_role
 from py_spring_admin.core.repository.commons import UserRole
 from py_spring_admin.core.repository.models import User
 from py_spring_admin.core.repository.user_service import UserService

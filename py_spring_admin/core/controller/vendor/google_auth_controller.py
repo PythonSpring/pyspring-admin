@@ -7,7 +7,7 @@ from py_spring_admin.core.service.vendor.google_auth_service import GoogleAuthSe
 class GoogleAuthController(AdminAuthController):
     google_auth_service: GoogleAuthService
     class Config:
-        prefix: str = "/google/public"
+        prefix: str = "/spring-admin/google/public"
     def register_routes(self) -> None:
         @self.router.post("/login")
         def user_login(

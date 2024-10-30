@@ -65,7 +65,7 @@ class UserService(Component):
             user_read = optional_user.as_read()
 
         return user_read
-        ...
+
 
     def register_user(self, new_user: RegisterUser) -> User:
         optional_user = self.find_user_by_email(new_user.email)

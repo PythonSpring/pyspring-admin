@@ -4,7 +4,7 @@ from fastapi import HTTPException, Request, status
 from fastapi.responses import JSONResponse
 from loguru import logger
 from py_spring_core import RestController
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 from py_spring_admin.core.repository.commons import UserRead
 from py_spring_admin.core.repository.user_service import RegisterUser, UserService
@@ -48,8 +48,7 @@ CredentialType = Optional[EmailCredential | UserNameCredential]
 
 
 class LoginResponse(BaseModel):
-    message: str
-    user: Optional[UserRead] = Field(default=None)
+    message: Optional[UserRead] = None
     status: int = status.HTTP_200_OK
 
 
@@ -97,10 +96,10 @@ class AdminAuthController(RestController):
 
             if optional_user is None:
                 return LoginResponse(
-                    message="Login required", status=status.HTTP_401_UNAUTHORIZED
+                    message=None, status=status.HTTP_401_UNAUTHORIZED
                 )
             return LoginResponse(
-                user=optional_user, message="User found", status=status.HTTP_200_OK
+                message=optional_user, status=status.HTTP_200_OK
             )
         
         @self.router.post("/token")
