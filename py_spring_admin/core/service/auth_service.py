@@ -1,9 +1,11 @@
-import datetime
 import logging
 from email.message import EmailMessage
 from typing import Any, Optional, Type, TypeVar
 from uuid import uuid4
+import cryptography
+from cryptography.fernet import Fernet
 
+import cryptography.fernet
 import jwt
 from loguru import logger
 from passlib.context import CryptContext
@@ -11,6 +13,7 @@ from py_spring_core import BeanCollection, Component, Properties
 from pydantic import BaseModel, Field, ValidationError
 from typing_extensions import TypedDict
 
+from py_spring_admin.core.service.errors import PasswordDoesNotMatch, UserNotFound
 import py_spring_admin.core.service.template as template
 from py_spring_admin.core.repository.commons import ResetPasswordSchema, UserRead
 from py_spring_admin.core.repository.models import User
@@ -18,7 +21,9 @@ from py_spring_admin.core.repository.user_service import UserService
 from py_spring_admin.core.service.otp_service import InvalidOtpError, OtpPurpose, OtpService
 from py_spring_admin.core.service.smtp_service import EmailContentType, SmtpService
 
+JsonWebTokenEncrypted= str
 JsonWebToken = str
+Token = JsonWebToken | JsonWebTokenEncrypted
 IsResetPasswordSuccess = bool
 IsSendEmailSuccess = bool
 
@@ -36,10 +41,6 @@ class AdminSecurityProperties(Properties):
     secret: str = Field(default_factory=lambda: str(uuid4()))
 
 
-class PermissionDeniedError(Exception): ...
-
-
-class UserNotFoundError(Exception): ...
 
 
 class SecurityBeanCollection(BeanCollection):
@@ -48,6 +49,10 @@ class SecurityBeanCollection(BeanCollection):
     @classmethod
     def create_bcrypt_password_context(cls) -> CryptContext:
         return CryptContext(schemes=["bcrypt"], deprecated="auto")
+    
+    @classmethod
+    def create_fernet(cls) -> Fernet:
+        return Fernet(Fernet.generate_key())
 
 
 class AuthService(Component):
@@ -81,6 +86,7 @@ class AuthService(Component):
     uesr_service: UserService
     smtp_service: SmtpService
     password_context: CryptContext
+    fernet: Fernet
     otp_service: OtpService
 
     def post_construct(self) -> None:
@@ -94,27 +100,27 @@ class AuthService(Component):
 
     def __login_user(
         self, optional_user: Optional[User], password: str
-    ) -> JsonWebToken:
+    ) -> JsonWebTokenEncrypted:
         if optional_user is None:
-            raise UserNotFoundError("[USER NOT FOUND] User not found")
+            raise UserNotFound()
 
         if not self.__is_correct_password(password, optional_user.password):
-            raise PermissionDeniedError("[INVALID USER PASSWORD] Password is incorrect")
+            raise PasswordDoesNotMatch()
 
-        return self.__issue_token(optional_user.model_dump())
+        return self.issue_token(optional_user.model_dump(), is_encrypted= False)
 
-    def user_login_by_user_name(self, user_name: str, password: str) -> JsonWebToken:
+    def user_login_by_user_name(self, user_name: str, password: str) -> JsonWebTokenEncrypted:
         optional_user = self.uesr_service.find_user_by_user_name(user_name)
         return self.__login_user(optional_user, password)
 
-    def user_login_by_email(self, email: str, password: str) -> JsonWebToken:
+    def user_login_by_email(self, email: str, password: str) -> JsonWebTokenEncrypted:
         optional_user = self.uesr_service.find_user_by_email(email)
         return self.__login_user(optional_user, password)
     
     def _get_user_by_email(self, email: str) -> User:
         optional_user = self.uesr_service.find_user_by_email(email)
         if optional_user is None:
-            raise UserNotFoundError(f"[USER NOT FOUND] User email: {email} not found")
+            raise UserNotFound()
         return optional_user
 
     def send_reset_user_password_email(self, email: str) -> IsSendEmailSuccess:
@@ -149,7 +155,7 @@ class AuthService(Component):
         self, user_email: str, new_password: str, password_for_confirmation: str
     ) -> None:
         if new_password != password_for_confirmation:
-            raise ValueError("Passwords do not match")
+            raise PasswordDoesNotMatch()
         logger.info(f"[PASSWORD UPDATE] Updating password for user: {user_email}")
         self.uesr_service.update_user_password(user_email, new_password)
         logger.info(f"[DELETE OTP] Deleting OTP for user: {user_email}")
@@ -209,16 +215,24 @@ class AuthService(Component):
             logger.error(invalid_token_error)
             return
 
-        return optional_user.as_read()
+        return optional_user.as_read() 
 
-    def __issue_token(self, payload: dict[str, Any]) -> JsonWebToken:
-        return jwt.encode(
+    def issue_token(self, payload: dict[str, Any], is_encrypted: bool) -> Token:
+        _jwt = jwt.encode(
             payload, self.admin_security_properties.secret, algorithm="HS256"
         )
+        if is_encrypted:
+            return self.fernet.encrypt(_jwt.encode()).decode()
+        return _jwt
 
-    def __decode_token_returning_model(self, token: str, model: Type[T]) -> Optional[T]:
+    def decode_token_returning_model(self, token: str, model: Type[T]) -> Optional[T]:
+        try:
+            _jwt = self.fernet.decrypt(token.encode())
+        except cryptography.fernet.InvalidToken:
+            logger.error("Key mismatch for decryption...")
+            return
         payload = jwt.decode(
-            token, self.admin_security_properties.secret, algorithms=["HS256"]
+            _jwt, self.admin_security_properties.secret, algorithms=["HS256"]
         )
         try:
             return model.model_validate(payload)

@@ -10,12 +10,13 @@ from loguru import logger
 from py_spring_core import Component, Properties
 from pydantic import Field
 
+from py_spring_admin.core.service.errors import EmailDomainNowAllowed
+
 
 class ServiceProvider(Enum):
     Google = "google"
 
 
-class EmailDomainNowAllowedError(Exception): ...
 
 
 class SmtpProperties(Properties):
@@ -85,9 +86,7 @@ class SmtpService(Component):
                 is_allowed = True
                 break
         if not is_allowed:
-            raise EmailDomainNowAllowedError(
-                f"Email Domain: {receiver_email} is not allowed"
-            )
+            raise EmailDomainNowAllowed()
 
         message = EmailMessage()
         message["From"] = cls.smtp_properties.sender_email

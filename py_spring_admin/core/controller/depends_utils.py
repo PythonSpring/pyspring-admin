@@ -5,7 +5,8 @@ import cachetools
 from fastapi import Request
 
 from py_spring_admin.core.repository.commons import StrEnum
-from py_spring_admin.core.service.auth_service import JWTUser, PermissionDeniedError
+from py_spring_admin.core.service.auth_service import JWTUser
+from py_spring_admin.core.service.errors import PermissionDeniedError, UserEmailNotVerified
 
 
 def get_current_user(request: Request) -> JWTUser:
@@ -67,7 +68,7 @@ def require_in_roles(roles: list[StrEnum]) -> Callable[..., Any]:
             user: JWTUser = request.state.user
             
             if not user["is_verified"]:
-                raise PermissionDeniedError("User email is not verified")
+                raise UserEmailNotVerified()
 
             for role in roles:
                 if user["role"] == role:

@@ -6,6 +6,7 @@ from fastapi.responses import JSONResponse
 from loguru import logger
 
 from py_spring_admin.core.controller.middleware.middleware_base import MiddlewareBase
+from py_spring_admin.core.service.errors import HandledServerError
 
 
 class ExceptionMiddleware(MiddlewareBase):
@@ -19,6 +20,17 @@ class ExceptionMiddleware(MiddlewareBase):
         )
         try:
             return await call_next(request)
+        
+        except HandledServerError as handled_error:
+            logger.error(f"Handled Error: {handled_error.message}, code: {handled_error.status_code}")
+            return JSONResponse(
+                content={
+                    "timestamp": utc_time,
+                    "message": handled_error.message,
+                    "status": handled_error.status_code,
+                },
+                status_code= status.HTTP_403_FORBIDDEN,
+            )
         except Exception as base_exception:
             logger.exception(base_exception)
             return JSONResponse(

@@ -14,6 +14,8 @@ from py_spring_admin.core.repository.models import User, UserRole
 from py_spring_admin.core.repository.user_repository import UserRepository
 from py_spring_model import PySpringModel
 
+from py_spring_admin.core.service.errors import StatusCode, UserAlreadyRegistered, UserNotFound
+
 class RegisterUser(BaseModel):
     user_name: str
     password: str
@@ -43,7 +45,7 @@ class UserService(Component):
                 {"email": user_email}, session
             )
             if optional_user is None:
-                raise ValueError("User not found")
+                raise UserNotFound()
             optional_user.password = self.get_hashed_password(new_password)
             logger.info(f"User password updated: {optional_user}")
             user_read = optional_user.as_read()
@@ -56,7 +58,7 @@ class UserService(Component):
                 {"email": user_email}, session
             )
             if optional_user is None:
-                raise ValueError("User not found")
+                raise UserNotFound()
             optional_user.is_verified = True
             logger.info(f"User email verified: {optional_user}")
             user_read = optional_user.as_read()
@@ -65,6 +67,12 @@ class UserService(Component):
         ...
 
     def register_user(self, new_user: RegisterUser) -> User:
+        optional_user = self.find_user_by_email(new_user.email)
+        if optional_user is not None:
+            if optional_user.is_verified:
+                raise UserAlreadyRegistered(StatusCode.UserAlreadyRegisteredAndVerified)
+            else:
+                raise UserAlreadyRegistered(StatusCode.UserAlreadyRegisteredAndUnverified)
         hashed_password = self.get_hashed_password(new_user.password)
         user = User(
             user_name=new_user.user_name,

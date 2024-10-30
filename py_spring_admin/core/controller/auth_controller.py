@@ -9,6 +9,7 @@ from pydantic import BaseModel, Field
 from py_spring_admin.core.repository.commons import UserRead
 from py_spring_admin.core.repository.user_service import RegisterUser, UserService
 from py_spring_admin.core.service.auth_service import AuthService
+from py_spring_admin.core.service.errors import UserNotFound
 from py_spring_admin.core.service.otp_service import OtpPurpose
 
 
@@ -24,17 +25,21 @@ class UserNameCredential(CredentialContext):
     user_name: str
 
 
+class TokenIssueSchema(BaseModel):
+    purpose: OtpPurpose
+    email: str
 
 
+
+
+class TokenSchema(BaseModel):
+    token: str
 
 class OtpVerificationSchema(BaseModel):
-    email: str
     code: str
 
 
 class ResetPasswordSchema(BaseModel):
-    email: str
-    code: str # TODO: moe this to separate function to check code.
     new_password: str
     password_for_confirmation: str
 
@@ -96,59 +101,85 @@ class AdminAuthController(RestController):
             return LoginResponse(
                 user=optional_user, message="User found", status=status.HTTP_200_OK
             )
+        
+        @self.router.post("/token")
+        def get_token(schema: TokenIssueSchema) -> JSONResponse:
+            optional_user = self.user_service.find_user_by_email(schema.email)
+            if optional_user is None:
+                raise UserNotFound()
+            token = self.auth_service.issue_token({"purpose": schema.purpose, "email": schema.email}, is_encrypted= True)
+            return self._create_json_response(
+                token, status_code=status.HTTP_202_ACCEPTED
+            )
 
-        @self.router.post("/send_reset_password_email")
-        def send_reset_password_email(email: str) -> JSONResponse:
-            self.auth_service.send_reset_user_password_email(email)
-            return self._create_json_response(
-                "Reset password email sent", status_code=status.HTTP_202_ACCEPTED
-            )
-        
-        @self.router.post("/resend_user_verification_email")
-        def send_user_verification_email(email: str) -> JSONResponse:
-            self.auth_service.send_user_verification_email(email)
-            return self._create_json_response(
-                "Verification email sent", status_code=status.HTTP_202_ACCEPTED
-            )
-        
-        
+        @self.router.post("/resend_email")
+        def send_verification_email(token_schema: TokenSchema) -> JSONResponse:
+            schema = self.auth_service.decode_token_returning_model(token_schema.token, TokenIssueSchema)
+            if schema is None:
+                return self._create_json_response(
+                    "Invalid token", status_code=status.HTTP_401_UNAUTHORIZED
+                )
+            
+            match schema.purpose:
+                case OtpPurpose.PasswordReset:
+                    self.auth_service.send_reset_user_password_email(schema.email)
+                    return self._create_json_response(
+                        "Reset password email sent", status_code=status.HTTP_202_ACCEPTED
+                    )
+                case OtpPurpose.UserRegistration:
+                    self.auth_service.send_user_verification_email(schema.email)
+                    return self._create_json_response(
+                        "Verification email sent", status_code=status.HTTP_202_ACCEPTED
+                    )
         
         @self.router.post("/verify_user_email")
-        def verify_email(schema: OtpVerificationSchema) -> JSONResponse:
+        def verify_email(token_schema: TokenSchema, otp_verification_schema: OtpVerificationSchema) -> JSONResponse:
+            token_issue_schema = self.auth_service.decode_token_returning_model(token_schema.token, TokenIssueSchema)
+            if token_issue_schema is None:
+                return self._create_json_response(
+                    "Invalid token", status_code=status.HTTP_401_UNAUTHORIZED
+                )
+            if token_issue_schema.purpose != OtpPurpose.UserRegistration:
+                return self._create_json_response(
+                    "Invalid token for wrong purpose", status_code=status.HTTP_401_UNAUTHORIZED
+                )
             optional_error = self.auth_service.validate_otp(
-                OtpPurpose.UserRegistration, schema.email, schema.code
+                OtpPurpose.UserRegistration, token_issue_schema.email, otp_verification_schema.code
             )
             if optional_error is not None:
                 return self._create_json_response(
                     str(optional_error), status_code=status.HTTP_403_FORBIDDEN
                 )
             
-            self.user_service.update_user_email_verified(schema.email)
+            self.user_service.update_user_email_verified(token_issue_schema.email)
             return self._create_json_response("Email verified successfully")
-        
-        @self.router.post("/validate_otp/{purpose}")
-        def validate_otp(schema: OtpVerificationSchema, purpose: OtpPurpose) -> JSONResponse:
-            optional_error = self.auth_service.validate_otp(
-                purpose, schema.email, schema.code
-            )
-            if optional_error is not None:
-                return self._create_json_response(
-                    str(optional_error), status_code=status.HTTP_403_FORBIDDEN
-                )
-            return self._create_json_response("OTP validated successfully")
-            
+
 
         @self.router.post("/reset_password")
-        def reset_password(schema: ResetPasswordSchema) -> JSONResponse:
+        def reset_password(
+            token_schema: TokenSchema, 
+            token_verification_schema: OtpVerificationSchema,
+            password_reset_schema: ResetPasswordSchema
+        ) -> JSONResponse:
+            token_issue_schema = self.auth_service.decode_token_returning_model(token_schema.token, TokenIssueSchema)
+            if token_issue_schema is None:
+                return self._create_json_response(
+                    "Invalid token", status_code=status.HTTP_401_UNAUTHORIZED
+                )
+            if token_issue_schema.purpose != OtpPurpose.PasswordReset:
+                return self._create_json_response(
+                    "Invalid token for wrong purpose", status_code=status.HTTP_401_UNAUTHORIZED
+                )
+            
             optional_error = self.auth_service.validate_otp(
-                OtpPurpose.PasswordReset, schema.email, schema.code
+                OtpPurpose.PasswordReset, token_issue_schema.email, token_verification_schema.code
             )
             if optional_error is not None:
                 return self._create_json_response(
                     str(optional_error), status_code=status.HTTP_403_FORBIDDEN
                 )
             self.auth_service.update_user_password(
-                schema.email, schema.new_password, schema.password_for_confirmation
+                token_issue_schema.email, password_reset_schema.new_password, password_reset_schema.password_for_confirmation
             )
 
             response = self._create_json_response(
