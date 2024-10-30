@@ -4,7 +4,7 @@ from loguru import logger
 from passlib.context import CryptContext
 from py_spring_core import Component
 from py_spring_model import PySpringModel
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from py_spring_core.core.entities.component import Component
 from pydantic import BaseModel
@@ -21,7 +21,7 @@ class RegisterUser(BaseModel):
     password: str
     email: str
     role: UserRole = UserRole.Guest
-    is_verified: bool
+    is_verified: bool = Field(default=False)
 
 
 class UserService(Component):
