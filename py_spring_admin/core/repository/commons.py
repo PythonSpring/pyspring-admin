@@ -1,6 +1,6 @@
 import datetime
 from enum import Enum
-from typing import Optional
+from typing import Optional, TypedDict
 
 from pydantic import BaseModel, Field
 
@@ -19,6 +19,11 @@ class UserRead(BaseModel):
     user_name: str
     is_verified: bool
 
+class JWTUser(TypedDict):
+    id: int
+    role: str
+    user_name: str
+    is_verified: bool
 
 class ResetPasswordSchema(BaseModel):
     id: int

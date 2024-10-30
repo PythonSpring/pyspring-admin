@@ -15,7 +15,7 @@ from typing_extensions import TypedDict
 
 from py_spring_admin.core.service.errors import PasswordDoesNotMatch, UserNotFound
 import py_spring_admin.core.service.template as template
-from py_spring_admin.core.repository.commons import UserRead
+from py_spring_admin.core.repository.commons import JWTUser, UserRead
 from py_spring_admin.core.repository.models import User
 from py_spring_admin.core.repository.user_service import UserService
 from py_spring_admin.core.service.otp_service import InvalidOtpError, OtpPurpose, OtpService
@@ -26,11 +26,7 @@ from py_spring_admin.core.service.commons import JsonWebTokenEncrypted, Token, I
 T = TypeVar("T", bound=BaseModel)
 
 
-class JWTUser(TypedDict):
-    id: int
-    role: str
-    user_name: str
-    is_verified: bool
+
 
 
 class AdminSecurityProperties(Properties):
@@ -222,16 +218,14 @@ class AuthService(Component):
             jwt_user: JWTUser = jwt.decode(
                 token, self.admin_security_properties.secret, algorithms=["HS256"]
             )
-            user_id = jwt_user["id"]
-            optional_user = self.uesr_service.find_user_by_id(user_id)
-            if optional_user is None:
+            if jwt_user is None:
                 return
 
         except jwt.exceptions.InvalidTokenError as invalid_token_error:
             logger.error(invalid_token_error)
             return
 
-        return optional_user.as_read() 
+        return UserRead.model_validate(jwt_user)
 
     def issue_token(self, payload: dict[str, Any], is_encrypted: bool) -> Token:
         _jwt = jwt.encode(

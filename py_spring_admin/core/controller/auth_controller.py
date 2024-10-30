@@ -92,14 +92,14 @@ class AdminAuthController(RestController):
 
         @self.router.get("/user")
         def get_current_user(request: Request) -> LoginResponse:
-            optional_user = self._get_user_from_cookies(request)
+            optional_user_read = self._get_user_from_cookies(request)
 
-            if optional_user is None:
+            if optional_user_read is None:
                 return LoginResponse(
                     message=None, status=status.HTTP_401_UNAUTHORIZED
                 )
             return LoginResponse(
-                message=optional_user, status=status.HTTP_200_OK
+                message=optional_user_read, status=status.HTTP_200_OK
             )
         
         @self.router.post("/token")
@@ -217,6 +217,6 @@ class AdminAuthController(RestController):
         optional_jwt = request.cookies.get(self.COOKIE_NAME)
         if optional_jwt is None:
             return
-        optional_user = self.auth_service.get_user_from_jwt(optional_jwt)
-        logger.info(f"[JWT USER FOUND] User: {optional_user}")
-        return optional_user
+        user_read = self.auth_service.get_user_from_jwt(optional_jwt)
+        logger.info(f"[JWT USER FOUND] User: {user_read}")
+        return user_read
